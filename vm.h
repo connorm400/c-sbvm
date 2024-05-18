@@ -4,7 +4,18 @@
 #include "stack.h"
 
 
-typedef enum { OP_PUSH, OP_ADD, OP_PRINT, OP_EXIT } OpCode;
+typedef enum { 
+    OP_PUSH, // pushes to the stack. requires an item 
+    // math
+    // pops top two elements, pushing the result of the two .integer operated on each other
+    OP_ADD, 
+    OP_SUBTRACT,
+    OP_MULTIPLY,
+    OP_DIVIDE,
+    OP_PRINT, // pops the top elements and prints it
+    OP_EXIT, // exits with error code popped from top of stack
+} OpCode;
+
 typedef struct {
     OpCode code;
     union {

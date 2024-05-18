@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "vm.h"
 
 #define MATH_OP(Infix) \
@@ -21,6 +20,15 @@ extern int eval(Instruction* program, char** stringtable) {
                 break;
             case OP_ADD:
                 MATH_OP(+);
+                break;
+            case OP_SUBTRACT:
+                MATH_OP(-);
+                break;
+            case OP_MULTIPLY:
+                MATH_OP(*);
+                break;
+            case OP_DIVIDE:
+                MATH_OP(/);
                 break;
             case OP_EXIT:
                 return stack_pop().integer;

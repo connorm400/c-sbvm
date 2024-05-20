@@ -48,12 +48,22 @@ extern void inst_print(Instruction inst, char** stringtable) {
         case OP_ADD:
             printf("{add instruction}");
             break;
+        case OP_SUBTRACT:
+            printf("{subtract instruction}");
+            break;
+        case OP_MULTIPLY:
+            printf("{multiply instruction}");
+            break;
+        case OP_DIVIDE:
+            printf("{divide instruction}");
+            break;
         case OP_PRINT:
             printf("{print instruction}");
             break;
         case OP_EXIT:
             printf("{exit instruction}");
             break;
+        
     }
 }
 

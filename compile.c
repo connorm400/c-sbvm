@@ -39,7 +39,6 @@ int main(int argc, char** argv) {
     size_t nmemb = sizeof(program) / sizeof(Instruction);
     fwrite(&nmemb, sizeof(size_t), 1, f);
     fwrite(program, sizeof(Instruction), nmemb, f);
-    
 
     fclose(f);
     return 0;

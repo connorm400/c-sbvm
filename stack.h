@@ -6,9 +6,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef enum { T_STR, T_INT, T_NULL } Type;
 typedef struct {
-    Type type;
+    enum { T_STR, T_INT, T_NULL } type;
     union {
         size_t str_idx;
         int32_t integer;
@@ -20,7 +19,7 @@ static struct {
     StackItem arr[STACK_SIZE];
 } stack = { .size = 0 };
 
-int stack_push(StackItem item);
-StackItem stack_pop();
+extern int stack_push(StackItem item);
+extern StackItem stack_pop();
 
 #endif

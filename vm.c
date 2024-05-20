@@ -5,8 +5,7 @@
     {StackItem a = stack_pop(); \
      StackItem b = stack_pop(); \
      StackItem res = { \
-        .type = T_INT, .integer = a.integer Infix b.integer, \
-     }; \
+        .type = T_INT, .integer = a.integer Infix b.integer, }; \
      stack_push(res);}
 
 extern int eval(Instruction* program, char** stringtable) {
@@ -18,18 +17,10 @@ extern int eval(Instruction* program, char** stringtable) {
             case OP_PRINT:
                 item_print(stack_pop(), stringtable);
                 break;
-            case OP_ADD:
-                MATH_OP(+);
-                break;
-            case OP_SUBTRACT:
-                MATH_OP(-);
-                break;
-            case OP_MULTIPLY:
-                MATH_OP(*);
-                break;
-            case OP_DIVIDE:
-                MATH_OP(/);
-                break;
+            case OP_ADD: MATH_OP(+); break;
+            case OP_SUBTRACT: MATH_OP(-); break;
+            case OP_MULTIPLY: MATH_OP(*); break;
+            case OP_DIVIDE: MATH_OP(/); break;
             case OP_EXIT:
                 return stack_pop().integer;
                 break;

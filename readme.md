@@ -2,7 +2,7 @@ neat little stack based virtual machine thingy. Doesn't have conditionals or a w
 
 # how to use it
 
-The program is currently a data structure in `compile.c`. To create the program, just compile `compile.c stack.c vm.c` and give the filename as the first argument when you run it. To run the program do the same with `run.c` isntead of `compile.c`.
+Compile the two programs with `make install`. `./compile` will compile the program written in `compile.c` to `argv[1]`. `./run` will run the program.  
 
 # how it currently works
 

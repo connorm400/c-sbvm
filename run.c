@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
     puts("=======");
     #endif
 
+    // evaluate the program (eval returns the exit status)
     int exit_res = eval(program, strings);
 
     // freeing stuff

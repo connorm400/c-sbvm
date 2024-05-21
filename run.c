@@ -41,7 +41,9 @@ int main(int argc, char** argv) {
     Instruction* program = (Instruction*)malloc(sizeof(Instruction) * nmemb);
     assert(program && "buy more ram");
     fread(program, sizeof(Instruction), nmemb, f);
-
+    
+    fclose(f);
+    
     #if DEBUG
     puts("Instructions:");
     putchar('[');
@@ -61,6 +63,6 @@ int main(int argc, char** argv) {
         free(strings[i]);
     }   
     free(strings);
-    fclose(f);
+    
     return exit_res;
 }

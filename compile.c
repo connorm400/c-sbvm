@@ -11,10 +11,11 @@ int main(int argc, char** argv) {
 
     // DATA TO WRITE
     char* strings[] = {
-        "1 + 2 is ", //0
-        ".\n" //1
+        /* 0 */ "1 + 2 = ", 
+        /* 1 */ ".\n" 
     };
-    Instruction program[] = {
+
+    Instruction main[] = {
         { .code = OP_PUSH, .item = { .type = T_STR, .str_idx = 0 } },
         { .code = OP_PRINT },
         { .code = OP_PUSH, .item = { .type = T_INT, .integer = 1 } },
@@ -27,6 +28,10 @@ int main(int argc, char** argv) {
         { .code = OP_EXIT },
     };
 
+    /*Instruction* program[] = {
+        main, 
+    };*/
+
     size_t strarrsize = sizeof(strings) / sizeof(char*);
     fwrite(&strarrsize, sizeof(size_t), 1, f);
 
@@ -36,9 +41,9 @@ int main(int argc, char** argv) {
         fwrite(strings[i], sizeof(char), strsize, f);
     }
 
-    size_t nmemb = sizeof(program) / sizeof(Instruction);
+    size_t nmemb = sizeof(main) / sizeof(Instruction);
     fwrite(&nmemb, sizeof(size_t), 1, f);
-    fwrite(program, sizeof(Instruction), nmemb, f);
+    fwrite(main, sizeof(Instruction), nmemb, f);
 
     fclose(f);
     return 0;

@@ -6,11 +6,14 @@
 #include <stdint.h>
 #include <stddef.h>
 
+typedef enum { LT, GT, EQ } comparisons;
+
 typedef struct {
-    enum { T_STR, T_INT, T_NULL } type;
+    enum { T_STR, T_INT, T_NULL, T_CMP } type;
     union {
         size_t str_idx;
         int32_t integer;
+        comparisons cmp;
     };
 } StackItem;
 
@@ -21,5 +24,6 @@ static struct {
 
 extern int stack_push(StackItem item);
 extern StackItem stack_pop();
+extern void stack_print(char** stringtable);
 
 #endif

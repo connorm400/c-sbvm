@@ -28,6 +28,10 @@ extern int eval(Label* labels, char** stringtable) {
             case OP_PUSH:
                 stack_push(labels[idx].instructions[i].item);
                 break;
+            case OP_DUP:
+                StackItem item = stack_pop();
+                stack_push(item); stack_push(item);
+                break;
             case OP_PRINT:
                 item_print(stack_pop(), stringtable);
                 break;
@@ -61,54 +65,6 @@ extern int eval(Label* labels, char** stringtable) {
                 break;
 
         }
-        /*
-        switch (labels[idx].instructions[i].code) {
-            case OP_PUSH:
-                stack_push(labels[idx].instructions[i].item);
-                break;
-            case OP_PRINT:
-                item_print(stack_pop(), stringtable);
-                break;
-            case OP_ADD: MATH_OP(+); break;
-            case OP_SUBTRACT: MATH_OP(-); break;
-            case OP_MULTIPLY: MATH_OP(*); break;
-            case OP_DIVIDE: MATH_OP(/); break;
-            case OP_CMP:
-                StackItem a = stack_pop();
-                StackItem b = stack_pop();
-
-                comparisons comp;
-                if (a.integer == b.integer) comp = EQ;
-                else if (a.integer < b.integer) comp = GT;
-                else if (a.integer > b.integer) comp = LT;
-
-                StackItem res = { .type = T_CMP, .cmp = comp };
-                stack_push(res);
-                break;
-            case OP_JMP:
-                idx = labels[idx].instructions->label_idx;
-                i = 0;
-                break;
-            case OP_JE:
-                if (stack_pop().cmp == EQ) { idx = labels[idx].instructions[i].label_idx; i = 0; }
-                break;
-            case OP_JNE:
-                if (stack_pop().cmp != EQ) { idx = labels[idx].instructions[i].label_idx; i = 0; }
-                break;
-            case OP_JLT:
-                if (stack_pop().cmp == LT) { idx = labels[idx].instructions[i].label_idx; i = 0; }
-                break;
-            case OP_JGT:
-                if (stack_pop().cmp == GT) { idx = labels[idx].instructions[i].label_idx; i = 0; }
-                break;
-            case OP_EXIT:
-                return stack_pop().integer;
-                break;
-        }
-        */
-
-
-        //labels[idx].instructions++;
     }
 }
 
@@ -118,6 +74,9 @@ extern void inst_print(Instruction inst, char** stringtable) {
             printf("{push instruction; item ");
             item_print(inst.item, stringtable);
             putchar('}');
+            break;
+        case OP_DUP:
+            printf("{duplicate instruction}");
             break;
         case OP_ADD:
             printf("{add instruction}");

@@ -6,6 +6,7 @@
 
 typedef enum { 
     OP_PUSH, // pushes to the stack. requires an item 
+    OP_DUP, // duplicate top stack item
     // math
     // pops top two elements, pushing the result of the two .integer operated on each other
     OP_ADD, 

@@ -1,0 +1,28 @@
+start {
+    p("(1 > 2) is ")
+    print
+    p(1)
+    p(2)
+    cmp
+    jgt(gt_branch)
+    jmp(lt_branch)
+}
+
+gt_branch {
+    p("true")
+    print
+    jmp(end)
+}
+
+lt_branch {
+    p("false")
+    print
+    jmp(end)
+}
+
+end {
+    p(".\n")
+    print
+    p(0)
+    exit
+}

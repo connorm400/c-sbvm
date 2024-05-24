@@ -5,7 +5,7 @@
 #include "vm.h"
 
 int main(int argc, char** argv) {
-    assert(argc == 2);
+    assert(argc == 2 && "compile <ouput>");
     FILE* f = fopen(argv[1], "wb");
     assert(f && "failled to open file");
     

@@ -35,39 +35,39 @@ int main(int argc, char** argv) {
     printf("]\n");
     #endif
     
-    size_t label_nmemb;
-    fread(&label_nmemb, sizeof(size_t), 1, f);
+    size_t segment_nmemb;
+    fread(&segment_nmemb, sizeof(size_t), 1, f);
 
     #if DEBUG
-    printf("number of labels: %zu;\n", label_nmemb);
+    printf("number of segments: %zu;\n", segment_nmemb);
     #endif
 
-    Label* labels = (Label*)malloc(sizeof(Label) * label_nmemb);
-    assert(labels && "buy more ram");
+    Segment* segments = (Segment*)malloc(sizeof(Segment) * segment_nmemb);
+    assert(segments && "buy more ram");
 
-    for (size_t i = 0; i < label_nmemb; i++) {
+    for (size_t i = 0; i < segment_nmemb; i++) {
         // allocate and write name string
         size_t strsize;
         fread(&strsize, sizeof(size_t), 1, f);
-        labels[i].name = (char*)malloc(sizeof(char) * strsize);
-        assert(labels[i].name && "buy more ram");
-        fread(labels[i].name, sizeof(char), strsize, f);
+        segments[i].name = (char*)malloc(sizeof(char) * strsize);
+        assert(segments[i].name && "buy more ram");
+        fread(segments[i].name, sizeof(char), strsize, f);
 
         // allocate and write instructions
-        fread(&labels[i].size, sizeof(size_t), 1, f);
-        labels[i].instructions = (Instruction*)malloc(sizeof(Instruction) * labels[i].size);
-        assert(labels[i].instructions);
-        fread(labels[i].instructions, sizeof(Instruction), labels[i].size, f);
+        fread(&segments[i].size, sizeof(size_t), 1, f);
+        segments[i].instructions = (Instruction*)malloc(sizeof(Instruction) * segments[i].size);
+        assert(segments[i].instructions);
+        fread(segments[i].instructions, sizeof(Instruction), segments[i].size, f);
 
         #if DEBUG
         puts("====");
-        printf("strsize: %zu, str: \"%s\"\n", strsize, labels[i].name);
-        printf("labelsize: %zu\n", labels[i].size);
+        printf("strsize: %zu, str: \"%s\"\n", strsize, segments[i].name);
+        printf("segment size: %zu\n", segments[i].size);
         puts("instructions:");
         putchar('[');
-        for (size_t ii = 0; ii < labels[i].size; ii++) {
-            inst_print(labels[i].instructions[ii], strings);
-            printf("%s", (ii + 1 == labels[i].size) ? "" : ", ");
+        for (size_t ii = 0; ii < segments[i].size; ii++) {
+            inst_print(segments[i].instructions[ii], strings);
+            printf("%s", (ii + 1 == segments[i].size) ? "" : ", ");
         }
         printf("]\n");
         puts("====");
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
     fclose(f);
 
     // evaluate the program (eval returns the exit status)
-    int exit_res = eval(labels, strings);
+    int exit_res = eval(segments, strings);
 
     #if DEBUG
     printf("program result: %d; exiting with: %d\n", exit_res, (uint8_t)exit_res);
@@ -90,10 +90,10 @@ int main(int argc, char** argv) {
     }   
     free(strings);
     
-    for (size_t i = 0; i < label_nmemb; i++) {
-        free(labels[i].instructions);
-        free(labels[i].name);
+    for (size_t i = 0; i < segment_nmemb; i++) {
+        free(segments[i].instructions);
+        free(segments[i].name);
     }
-    free(labels);
+    free(segments);
     return exit_res;
 }

@@ -9,69 +9,36 @@ int main(int argc, char** argv) {
     FILE* f = fopen(argv[1], "wb");
     assert(f && "failled to open file");
     
-    #if 1
-    // DATA TO WRITE
-    char* strings[] = {
-        /* 0 */ "(1 > 2) is ", 
-        /* 1 */ ".\n",
-        /* 2 */ "false",
-        /* 3 */ "true"
+    char* stringtable[] = {
+        "hello, world!\n",
     };
 
-    Instruction main[] = {
+    Instruction start[] = {
         { .code = OP_PUSH, .item = { .type = T_STR, .str_idx = 0 } },
         { .code = OP_PRINT },
-        { .code = OP_PUSH, .item = { .type = T_INT, .integer = 1 } },
-        { .code = OP_PUSH, .item = { .type = T_INT, .integer = 2 } },
-        { .code = OP_CMP },
-        { .code = OP_JGT, .label_idx = 1 },
-        // else 
-        { .code = OP_JMP, .label_idx = 2 },
+        { .code = OP_PUSH, .item = { .type = T_INT, .integer = 0 } },
+        { .code = OP_EXIT }, 
     };
 
-    Instruction gt_branch[] = {
-        { .code = OP_PUSH, .item = { .type = T_STR, .str_idx = 3 } },
-        { .code = OP_PRINT },
-        { .code = OP_JMP, .label_idx = 3 },
+    Segment program[] = {
+        SEGMENT(start),
     };
-
-    Instruction lt_branch[] = {
-        { .code = OP_PUSH, .item = { .type = T_STR, .str_idx = 2}},
-        { .code = OP_PRINT },
-        { .code = OP_JMP, .label_idx = 3 },
-    };
-
-    Instruction end[] = {
-        { .code = OP_PUSH, .item = { .type = T_STR, .str_idx = 1 } },
-        { .code = OP_PRINT },
-        { .code = OP_PUSH, .item = { .type = T_INT, .integer = 42 } },
-        { .code = OP_EXIT },
-    }; 
-
-    Label program[] = {
-        /* 0 */ LABEL(main), 
-        /* 1 */ LABEL(gt_branch),
-        /* 2 */ LABEL(lt_branch),
-        /* 3 */ LABEL(end),
-    };
-    
-    #endif
 
     // write stringtable
     {
-        size_t strarrsize = sizeof(strings) / sizeof(char*);
+        size_t strarrsize = sizeof(stringtable) / sizeof(char*);
         fwrite(&strarrsize, sizeof(size_t), 1, f);
 
         for (size_t i = 0; i < strarrsize; i++) {
-            size_t strsize = strlen(strings[i]) + 1;
+            size_t strsize = strlen(stringtable[i]) + 1;
             fwrite(&strsize, sizeof(size_t), 1, f);
-            fwrite(strings[i], sizeof(char), strsize, f);
+            fwrite(stringtable[i], sizeof(char), strsize, f);
         }
     }
 
     // write labels
     {
-        size_t programs_nmemb = sizeof(program) / sizeof(Label);
+        size_t programs_nmemb = sizeof(program) / sizeof(Segment);
         fwrite(&programs_nmemb, sizeof(size_t), 1, f);
 
         for (size_t i = 0; i < programs_nmemb; i++) {

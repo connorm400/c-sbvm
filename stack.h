@@ -24,6 +24,7 @@ static struct {
 
 extern int stack_push(StackItem item);
 extern StackItem stack_pop();
-extern void stack_print(char** stringtable);
+extern StackItem stack_dig(size_t idx_from_top);
+//extern int stack_remove(size_t idx_from_top);
 
 #endif

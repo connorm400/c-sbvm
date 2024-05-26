@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <assert.h>
 #include "vm.h"
 
 #define MATH_OP(Infix) \
@@ -9,29 +10,43 @@
      stack_push(res);}
 
 #define JMP \
-    { idx = labels[idx].instructions[i].label_idx; \
+    { idx = segments[idx].instructions[i].segment_idx; \
       i = 0; \
       goto jmppoint;} 
 
-extern int eval(Label* labels, char** stringtable) {
-    size_t idx = 0; // start with 0 (main)
+extern int eval(Segment* segments, char** stringtable) {
+    size_t idx = 0; // segment index. start with 0 (main/start)
     for (size_t i = 0 ;; i++) {
         // ok I know that gotos are bad but I need this to skip the for loop increment its fine ok
         jmppoint:
-        #if DEBUG
-        printf("on label %s\n", labels[idx].name);
-        printf("i: %zu\n", i);
-        printf("instruction: "); inst_print(labels[idx].instructions[i], stringtable); putchar('\n'); 
         
+        #if DEBUG
+        printf("on segment %s\n", segments[idx].name);
+        printf("i: %zu\n", i);
+        printf("instruction: "); inst_print(segments[idx].instructions[i], stringtable); putchar('\n'); 
         #endif
-        switch (labels[idx].instructions[i].code) {
+
+        switch (segments[idx].instructions[i].code) {
+            // stack operations
             case OP_PUSH:
-                stack_push(labels[idx].instructions[i].item);
+                assert(!stack_push(segments[idx].instructions[i].item));
                 break;
             case OP_DUP:
-                StackItem item = stack_pop();
-                stack_push(item); stack_push(item);
+                StackItem item = stack_dig(0);
+                assert(!stack_push(item));
                 break;
+            /*
+            case OP_RM:
+                assert(!stack_remove(segments[idx].instructions[i].idx_from_top));
+                break;
+                */
+            case OP_DIG:
+                assert(!stack_push(stack_dig(segments[idx].instructions[i].idx_from_top)));
+                break;
+            case OP_DISCARD:
+                stack_pop();
+                break;
+
             case OP_PRINT:
                 item_print(stack_pop(), stringtable);
                 break;
@@ -42,6 +57,7 @@ extern int eval(Label* labels, char** stringtable) {
             case OP_MULTIPLY: MATH_OP(*); break;
             case OP_DIVIDE: MATH_OP(/); break;
 
+            // comparison
             case OP_CMP:
                 StackItem a = stack_pop();
                 StackItem b = stack_pop();
@@ -50,10 +66,11 @@ extern int eval(Label* labels, char** stringtable) {
                 else if (a.integer > b.integer) cmp = LT;
                 else if (a.integer < b.integer) cmp = GT;
 
-                StackItem res = {.type = T_CMP, .cmp = cmp };
-                stack_push(res);
+                StackItem res = { .type = T_CMP, .cmp = cmp };
+                assert(!stack_push(res));
                 break;
             
+            // control flow / jumps
             case OP_JMP: JMP; break;
             case OP_JE:  if (stack_pop().cmp == EQ) JMP; break;
             case OP_JNE: if (stack_pop().cmp != EQ) JMP; break;
@@ -78,6 +95,14 @@ extern void inst_print(Instruction inst, char** stringtable) {
         case OP_DUP:
             printf("{duplicate instruction}");
             break;
+        /*case OP_RM:
+            printf("{element removal instruction instruction}");
+            break;*/
+        case OP_DIG:
+            printf("{dig instruction}");
+            break;
+        case OP_DISCARD:
+            printf("{discard instruction}");
         case OP_ADD:
             printf("{add instruction}");
             break;

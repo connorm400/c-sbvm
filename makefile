@@ -12,14 +12,7 @@ runrelease:
 	gcc run.c vm.c stack.c
 	./a.out prog
 
-runcompiler:
-	gcc compile.c vm.c stack.c 
-	./a.out prog
-
-runrunner:
-	gcc run.c vm.c stack.c
-	./a.out prog
-
 install:
 	gcc -o compile compile.c vm.c stack.c 
-	gcc -o run run.c vm.c stack.c 
+	gcc -o run run.c vm.c stack.c  
+

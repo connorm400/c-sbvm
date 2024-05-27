@@ -1,3 +1,3 @@
 runcompiler:
 	gcc main.c lexer.c 
-	./a.out
+	./a.out prog.dra

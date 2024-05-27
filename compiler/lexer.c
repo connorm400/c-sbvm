@@ -39,6 +39,11 @@ extern token* lex_nexttoken(lex* l) {
         case '"':
             tok = _read_string(l);
             break;
+        case '#':
+            _lex_nextchar(l);
+            tok = _read_ident(l);
+            tok->type = LABEL;
+            return tok;
         default:
             if (isdigit(l->ch)) {
                 return _read_integer(l);
@@ -119,14 +124,8 @@ extern void lex_free(lex* l) {
 }
 
 extern void token_free(token* t) {
-    switch (t->type) {
-        case STRING:
-            free(t->string);
-            break;
-        case IDENT:
-            free(t->ident);
-            break;
-    }
+    if (t->type == STRING || t->type == IDENT || t->type == LABEL)
+        free(t->string); /* all the union member will be at the same spot so this should work */
 
     free(t);
 }
@@ -137,6 +136,7 @@ static bool _is_ident_letter(char c) {
 
 static token* _token_new(token_type type) {
     token* t = (token*)malloc(sizeof(token));
+    assert(t && "buy more ram");
     t->type = type;
     return t;
 }
@@ -151,6 +151,9 @@ extern void print_token(token* t) {
             break;
         case STRING:
             printf("[String \"%s\"]", t->string);
+            break;
+        case LABEL:
+            printf("[Label %%%s]", t->label);
             break;
         case LPAREN:
             printf("(");

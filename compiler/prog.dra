@@ -1,26 +1,26 @@
-start {
+#start {
     p("(1 > 2) is ")
     print
     p(1)
     p(2)
     cmp
-    jgt(gt_branch)
-    jmp(lt_branch)
+    jgt(gt-branch)
+    jmp(lt-branch)
 }
 
-gt_branch {
+#gt-branch {
     p("true")
     print
     jmp(end)
 }
 
-lt_branch {
+#lt-sbranch {
     p("false")
     print
     jmp(end)
 }
 
-end {
+#end {
     p(".\n")
     print
     p(0)

@@ -21,6 +21,7 @@ typedef enum {
     IDENT,
     INTEGER,
     STRING,
+    LABEL,
 
     LPAREN,
     RPAREN,
@@ -38,6 +39,7 @@ typedef struct {
         int32_t integer;
         char* string;
         char illegal;
+        char* label;
     };
 } token;
 

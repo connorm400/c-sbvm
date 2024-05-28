@@ -52,4 +52,14 @@ static token* _token_new(token_type t);
 static token* _read_integer(lex* l);
 static token* _read_ident(lex* l);
 static token* _read_string(lex* l);
+
+
+typedef struct {
+    token** arr;
+    size_t len;
+} tokens;
+// consume a lexer, converting to tokens plural
+extern tokens* lexer_collect(lex* l);
+extern void tokens_free(tokens* t);
+
 #endif

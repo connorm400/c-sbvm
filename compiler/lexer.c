@@ -5,6 +5,8 @@
 #include <ctype.h>
 #include <stdio.h>
 
+#define LEXER_COLLECTOR_STARTING_SIZE 100
+
 extern lex* lex_new(const char* input) {
     lex* temp = (lex*)malloc(sizeof(lex));
     assert(temp && "buy more ram");
@@ -39,7 +41,7 @@ extern token* lex_nexttoken(lex* l) {
         case '"':
             tok = _read_string(l);
             break;
-        case '#':
+        case '%':
             _lex_nextchar(l);
             tok = _read_ident(l);
             tok->type = LABEL;
@@ -174,4 +176,38 @@ extern void print_token(token* t) {
             printf("[End of File]");
             break;
     }
+}
+
+extern tokens* lexer_collect(lex* l) {
+    // making sort of a vector class for this
+    struct {
+        token** arr;
+        size_t len;
+        size_t capacity;
+    } vec = { .len = 0, .capacity = LEXER_COLLECTOR_STARTING_SIZE };
+    vec.arr = (token**)malloc(vec.capacity * sizeof(token*));
+
+    for (token* t = lex_nexttoken(l); t->type != T_EOF; t = lex_nexttoken(l)) {
+        if (vec.capacity <= vec.len) {
+            vec.capacity += vec.capacity / 2;
+            vec.arr = realloc(vec.arr, vec.capacity * sizeof(token*));
+        }
+        
+        vec.arr[vec.len] = t;
+        vec.len++;
+    }
+    
+    // reallocate the array so its more memory efficient
+    vec.arr = realloc(vec.arr, vec.len * sizeof(token*));
+    tokens* temp = (tokens*)malloc(sizeof(tokens));
+    temp->len = vec.len;
+    temp->arr = vec.arr;
+    return temp;
+}
+
+extern void tokens_free(tokens* t) {
+    for (size_t i = 0; i < t->len; i++) {
+        token_free(t->arr[i]);
+    }
+    free(t);
 }

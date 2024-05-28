@@ -28,15 +28,16 @@ int main(int argc, char** argv) {
     #endif
 
     lex* l = lex_new(filebuf);
+    tokens* t = lexer_collect(l);
+    lex_free(l);
 
-    
-    for (token* t = lex_nexttoken(l); t->type != T_EOF; t = lex_nexttoken(l)) {
-        print_token(t);
-        token_free(t);
+    for (size_t i = 0; i < t->len; i++) {
+        print_token(t->arr[i]);
         putchar('\n');
     }
     
-    lex_free(l);
+    tokens_free(t);
     free(filebuf);
+
     return 0;
 }

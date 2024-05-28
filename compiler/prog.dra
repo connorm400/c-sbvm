@@ -1,4 +1,4 @@
-#start {
+%start {
     p("(1 > 2) is ")
     print
     p(1)
@@ -8,19 +8,19 @@
     jmp(lt-branch)
 }
 
-#gt-branch {
+%gt-branch {
     p("true")
     print
     jmp(end)
 }
 
-#lt-sbranch {
+%lt-sbranch {
     p("false")
     print
     jmp(end)
 }
 
-#end {
+%end {
     p(".\n")
     print
     p(0)

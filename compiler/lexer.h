@@ -48,7 +48,7 @@ extern void token_free(token* t);
 extern void print_token(token* t);
 static token* _token_new(token_type t);
 
-
+static char* __read(lex* l, bool(*pred)(char));
 static token* _read_integer(lex* l);
 static token* _read_ident(lex* l);
 static token* _read_string(lex* l);

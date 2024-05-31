@@ -53,7 +53,6 @@ static token* _read_integer(lex* l);
 static token* _read_ident(lex* l);
 static token* _read_string(lex* l);
 
-
 typedef struct {
     token** arr;
     size_t len;

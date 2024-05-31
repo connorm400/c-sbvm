@@ -63,14 +63,26 @@ extern token* lex_nexttoken(lex* l) {
     return tok;
 }
 
+
+
 static void _lex_nextchar(lex* l) {
     l->cursor++;
     l->ch = l->input_len >= l->cursor ? l->input[l->cursor] : '\0';
 }
 
 static void _lex_skip_whitespace(lex* l) {
-    while (l->ch == ' ' || l->ch == '\t' || l->ch == '\n' || l->ch == '\r') 
+    while (l->ch == ' ' || l->ch == '\t' || l->ch == '\n' || l->ch == '\r' || l->ch == ';') {
+        if (l->ch == ';') {
+            while (l->ch != '\n') {
+                if (l->ch == '\0') {
+                    fprintf(stderr, "end of file reached\n");
+                    exit(-1);
+                }
+                _lex_nextchar(l);
+            }
+        }
         _lex_nextchar(l);
+    }
 }
 
 static char* __read(lex* l,  bool(*pred)(char)) { 

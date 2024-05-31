@@ -130,6 +130,7 @@ static void parse_segment(parser* p) {
     
     // realloc to free up memory
     seg.instructions = realloc(seg.instructions, seg.size * sizeof(Instruction));
+    assert(seg.instructions && "buy more ram");
     
     if (p->segments.len >= p->segments.capacity) {
         p->segments.capacity += p->segments.capacity / 3;
@@ -164,6 +165,7 @@ static Instruction parse_instruction(parser* p) {
                 if (p->stringtable.capacity <= p->stringtable.len) {
                     p->stringtable.capacity += p->stringtable.capacity / 3;
                     p->stringtable.arr = realloc(p->stringtable.arr, p->stringtable.capacity * sizeof(char*));
+                    assert(p->stringtable.arr && "buy more ram");
                 }
 
                 p->stringtable.arr[p->stringtable.len] = p->current->string;

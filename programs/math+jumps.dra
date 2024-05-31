@@ -1,12 +1,13 @@
+; the first label will always be ran first
 %start {
-    p("1 + 2 is ")
+    p("1 + 2 is ") ; push the string 1 + 2 to the stack
     print
-    p(1)
+    ; push 1 and 2
+    p(1) 
     p(2)
     add
     print
-    cr
-    print
+    cr print ; print a newline
     jmp(exit)
 }
 

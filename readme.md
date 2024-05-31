@@ -10,7 +10,7 @@ use `run` with the output to run it :).
 
 # syntax
 
-You can look at some example programs in `./programs/`.
+You can look at some example programs in `./programs/`. The main / starting label must be the first one.
 Here's a list of some of the instructions:
 ```
     p() - push to the stack. Can take a string or an integer

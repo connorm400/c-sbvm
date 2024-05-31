@@ -144,7 +144,7 @@ static Instruction parse_instruction(parser* p) {
     assert(p->current->type == IDENT);
     Instruction inst = {0};
     
-    //TODO: all the rest of the instructions to parse
+    // TODO: all the rest of the instructions to parse
     // PUSH OPCODE
     if (strcmp(p->current->ident, "p") == 0) {
         inst.code = OP_PUSH;

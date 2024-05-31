@@ -43,6 +43,11 @@ int main(int argc, char** argv) {
         res.stringtable.len, res.segment_nmemb);
     #endif
 
+    if (!res.r) {
+        fprintf(stderr, "COMPILER ERROR: %s", res.err_msg);
+        exit(1);
+    }
+
     FILE* f = fopen(argv[2], "wb");
     assert(f && "failled to open file");
     // write stringtable

@@ -22,6 +22,12 @@ typedef struct {
         size_t capacity;
         size_t len;
     } segments;
+
+    struct {
+        char** arr;
+        size_t capacity;
+        size_t len;
+    } labels;
 } parser;
 
 typedef struct {
@@ -38,5 +44,9 @@ static void advance_token(parser* p);
 extern void parser_free(parser* p);
 static void parse_segment(parser*);
 static Instruction parse_instruction(parser*);
+static Instruction parse_jump(parser* p, OpCode t);
+static void add_label(parser*);
+static size_t find_label(parser*);
+static void reset_parser_pos(parser*);
 
 #endif

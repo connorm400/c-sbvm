@@ -1,9 +1,32 @@
-neat little stack based virtual machine thingy. Doesn't have conditionals or a way to prevent UB yet.
+Stack based vitual machine with it's own assembly language
 
-# how to use it
+#install
+use `make install` in the root directory to make two binaries: `compile` and `run`. 
 
-Compile the two programs with `make install`. `./compile` will compile the program written in `compile.c` to `argv[1]`. `./run` will run the program.  
+#using
+Use `compile` with the first argument being the input `.dra` file, the second being the output file.
 
-# how it currently works
+use `run` with the output to run it :).
 
-its a stack based vitual machine: you can push to the top of the stack with OP_PUSH instructions, and the other instructions will pop those items as arguments and possibly push a result. When using strings you need to put it in the `strings[]` array and use `.str_idx` to refer to it's `strings[]` index. 
+#syntax
+
+You can look at some example programs in `./programs/`.
+Here's a list of some of the instructions:
+```
+    p() - push to the stack. Can take a string or an integer
+    cr - push a newline to the stack. the same as p("<\n>").
+    jmp() - jump to a label. Requires a label name. Will panic in compile if the label doesn't exist
+    cmp - compares top two elements. Pushes a comparison to the stack.
+    exit - exit with status code poped from stack
+    dup - duplicate top element
+    discard - pop top element, discarding it
+    add / subtract / multiply / divide - math. Popes top two elements, pushes result
+
+    === conditional jumps ===
+    these jumps will pop an element from the top of the stack, jumping if true.
+        - je - jump if equal
+        - jne - jump if not equal
+        - jgt - jump if greater than
+        - jlt - jump if less than
+    
+```

@@ -75,7 +75,13 @@ static void _lex_skip_whitespace(lex* l) {
 
 static char* __read(lex* l,  bool(*pred)(char)) { 
     size_t position = l->cursor;
-    while ((*pred)(l->ch)) _lex_nextchar(l);
+    while ((*pred)(l->ch)) {
+        if (l->ch == '\0') {
+            fprintf(stderr, "end of file reached\n");
+            exit(-1);
+        }
+        _lex_nextchar(l);
+    }
     char* newstr = (char*)malloc((l->cursor - position + 1) * sizeof(char));
     assert(newstr && "buy more ram");
     memcpy(newstr, l->input + position, (l->cursor - position) * sizeof(char));

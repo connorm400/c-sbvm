@@ -1,0 +1,8 @@
+%start {
+    p("hello, world!")
+    print
+    cr
+    print
+    p(0)
+    exit
+}

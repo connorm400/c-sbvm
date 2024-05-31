@@ -1,14 +1,14 @@
 Stack based vitual machine with it's own assembly language
 
-#install
+# install
 use `make install` in the root directory to make two binaries: `compile` and `run`. 
 
-#using
+# using
 Use `compile` with the first argument being the input `.dra` file, the second being the output file.
 
 use `run` with the output to run it :).
 
-#syntax
+# syntax
 
 You can look at some example programs in `./programs/`.
 Here's a list of some of the instructions:

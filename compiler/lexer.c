@@ -46,6 +46,7 @@ extern token* lex_nexttoken(lex* l) {
             tok = _read_ident(l);
             tok->type = LABEL;
             return tok;
+            break;
         default:
             if (isdigit(l->ch)) {
                 return _read_integer(l);
@@ -72,12 +73,12 @@ static void _lex_skip_whitespace(lex* l) {
         _lex_nextchar(l);
 }
 
-static char* __read(lex* l,  bool(*pred)(char)) {
+static char* __read(lex* l,  bool(*pred)(char)) { 
     size_t position = l->cursor;
     while ((*pred)(l->ch)) _lex_nextchar(l);
     char* newstr = (char*)malloc((l->cursor - position + 1) * sizeof(char));
     assert(newstr && "buy more ram");
-    memcpy(newstr, &l->input[position], (l->cursor - position) * sizeof(char));
+    memcpy(newstr, l->input + position, (l->cursor - position) * sizeof(char));
     newstr[l->cursor - position] = '\0';
     return newstr;
 }
@@ -92,6 +93,9 @@ static token* _read_integer(lex* l) {
     return tok;
 }
 
+static bool _is_ident_letter(char c) {
+    return isalpha(c) || c == '!' || c == '?' || c == '-' ;
+}
 static token* _read_ident(lex* l) {
     char* str = __read(l, _is_ident_letter);
     token* tok = _token_new(IDENT);
@@ -119,11 +123,7 @@ extern void token_free(token* t) {
     free(t);
 }
 
-static bool _is_ident_letter(char c) {
-    return isalpha(c) || c == '!' || c == '?' || c == '-' ;
-}
-
-static token* _token_new(token_type type) {
+token* _token_new(token_type type) {
     token* t = (token*)malloc(sizeof(token));
     assert(t && "buy more ram");
     t->type = type;

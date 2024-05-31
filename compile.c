@@ -3,56 +3,78 @@
 #include <stdint.h>
 #include <string.h>
 #include "vm.h"
+#include "compiler/lexer.h"
+#include "compiler/parser.h"
+#include <sys/stat.h>
+#include <stdlib.h>
 
 int main(int argc, char** argv) {
-    assert(argc == 2 && "compile <ouput>");
-    FILE* f = fopen(argv[1], "wb");
-    assert(f && "failled to open file");
+    assert(argc == 3 && "compile <input.dra> <ouput>");
     
-    char* stringtable[] = {
-        "hello, world!\n",
-    };
+    // open and read input file
+    FILE* input = fopen(argv[1], "rb");
+    assert(input && "error opening file");
 
-    Instruction start[] = {
-        { .code = OP_PUSH, .item = { .type = T_STR, .str_idx = 0 } },
-        { .code = OP_PRINT },
-        { .code = OP_PUSH, .item = { .type = T_INT, .integer = 0 } },
-        { .code = OP_EXIT }, 
-    };
+    #ifdef __linux__
 
-    Segment program[] = {
-        SEGMENT(start),
-    };
+    int fd = fileno(input);
+    struct stat statbuf;
+    assert(!fstat(fd, &statbuf));
+    size_t input_filesize = (size_t)statbuf.st_size / sizeof(char);
+    char* inputfilebuf = (char*)malloc(sizeof(char) * input_filesize);
+    assert(inputfilebuf && "buy more ram");
+    getdelim(&inputfilebuf, &input_filesize, '\0', input);
+    #else
+    #error we only support linux right now sorry
+    #endif
 
+    fclose(input);
+
+    lex* l = lex_new(inputfilebuf);
+    parser* p = parser_new(l);
+    parser_res res = parse(p);
+   
+    free(inputfilebuf);
+
+    #if DEBUG
+    printf(
+        "stringtable len: %zu\n"
+        "number of segments: %zu\n",
+        res.stringtable.len, res.segment_nmemb);
+    #endif
+
+    FILE* f = fopen(argv[2], "wb");
+    assert(f && "failled to open file");
     // write stringtable
     {
-        size_t strarrsize = sizeof(stringtable) / sizeof(char*);
-        fwrite(&strarrsize, sizeof(size_t), 1, f);
+        fwrite(&res.stringtable.len, sizeof(size_t), 1, f);
 
-        for (size_t i = 0; i < strarrsize; i++) {
-            size_t strsize = strlen(stringtable[i]) + 1;
+        for (size_t i = 0; i < res.stringtable.len; i++) {
+            size_t strsize = strlen(res.stringtable.arr[i]) + 1;
             fwrite(&strsize, sizeof(size_t), 1, f);
-            fwrite(stringtable[i], sizeof(char), strsize, f);
+            fwrite(res.stringtable.arr[i], sizeof(char), strsize, f);
         }
     }
 
     // write labels
     {
-        size_t programs_nmemb = sizeof(program) / sizeof(Segment);
-        fwrite(&programs_nmemb, sizeof(size_t), 1, f);
+        //size_t programs_nmemb = sizeof(program) / sizeof(Segment);
+        fwrite(&res.segment_nmemb, sizeof(size_t), 1, f);
 
-        for (size_t i = 0; i < programs_nmemb; i++) {
+        for (size_t i = 0; i < res.segment_nmemb; i++) {
             // first write label name
-            size_t strsize = strlen(program[i].name) + 1;
+            size_t strsize = strlen(res.segments[i].name) + 1;
             fwrite(&strsize, sizeof(size_t), 1, f);
-            fwrite(program[i].name, sizeof(char), strsize, f);
+            fwrite(res.segments[i].name, sizeof(char), strsize, f);
 
             // and then write the instructions
-            size_t nmemb = program[i].size;
+            size_t nmemb = res.segments[i].size;
             fwrite(&nmemb, sizeof(size_t), 1, f);
-            fwrite(program[i].instructions, sizeof(Instruction), nmemb, f);
+            fwrite(res.segments[i].instructions, sizeof(Instruction), nmemb, f);
         }
     }
+    
+    parser_free(p);
     
 
     fclose(f);

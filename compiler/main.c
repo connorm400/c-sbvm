@@ -1,11 +1,12 @@
 #include "lexer.h"
+#include "parser.h"
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 
 int main(int argc, char** argv) {
-    assert(argc == 2 && "compile <input.dra>");
+    assert(argc == 2 && "compile <input.dra> <output.dr>");
     FILE* f = fopen(argv[1], "rb");
     assert(f && "error opening file");
 
@@ -28,15 +29,12 @@ int main(int argc, char** argv) {
     #endif
 
     lex* l = lex_new(filebuf);
-    tokens* t = lexer_collect(l);
-    lex_free(l);
+    parser* p = parser_new(l);
+    parser_res res = parse(p);
 
-    for (size_t i = 0; i < t->len; i++) {
-        print_token(t->arr[i]);
-        putchar('\n');
-    }
-    
-    tokens_free(t);
+    printf("parser result: %s\n", res.r ? "pass" : "fail");
+
+    parser_free(p);
     free(filebuf);
 
     return 0;

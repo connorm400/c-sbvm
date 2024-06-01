@@ -1,0 +1,36 @@
+; this code will do the exact same thing as this c program:
+
+; #include <stdio.h>
+; int main(void) {
+;     for (int i = 0; i <= 10; i++)
+;         printf("increment #%d\n", i);
+;     
+;     printf("done.\n");
+;     return 0;
+; }
+
+%start {
+    p(0) ; push our starting value for the increment
+    jmp(loop) ; jump into the loop
+}
+
+%loop {
+    p("increment #") print
+    dup print ; print number, leaving it alone
+    cr print
+    dup ; duplicate the increment for the compare
+    p(10) ; push the 10 to compare with
+    cmp
+    je(end) ; if it equals to jump to the end
+    p(1) ; add 1 to the increment value
+    add
+    jmp(loop) ; restart the loop
+}
+
+%end {
+    p("done.")
+    print
+    cr print
+    p(0)
+    exit
+}

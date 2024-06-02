@@ -1,0 +1,10 @@
+%start {
+    p(1)
+    p(2)
+    dig(1)
+    print print print
+    cr print
+
+    p(0)
+    exit
+}

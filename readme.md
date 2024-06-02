@@ -19,8 +19,9 @@ Here's a list of some of the instructions:
     cmp - compares top two elements. Pushes a comparison to the stack.
     exit - exit with status code poped from stack
     dup - duplicate top element
+    dig - takes argument index from top - copies element from top to top of stack
     discard - pop top element, discarding it
-    add / subtract / multiply / divide - math. Popes top two elements, pushes result
+    add / subtract / multiply / divide - math. Pops top two elements, pushes result
 
     === conditional jumps ===
     these jumps will pop an element from the top of the stack, jumping if true.

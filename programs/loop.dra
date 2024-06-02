@@ -21,7 +21,7 @@
     dup ; duplicate the increment for the compare
     p(10) ; push the 10 to compare with
     cmp
-    je(end) ; if it equals to jump to the end
+    je(end) ; if it equals then jump to the end
     p(1) ; add 1 to the increment value
     add
     jmp(loop) ; restart the loop

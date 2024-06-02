@@ -204,6 +204,15 @@ static Instruction parse_instruction(parser* p) {
         inst.code = OP_DISCARD;
     } else if (strcmp(p->current->ident, "cmp") == 0) {
         inst.code = OP_CMP;
+    } else if (strcmp(p->current->ident, "dig") == 0) {
+        inst.code = OP_DIG;
+        // advance over dig and (
+        advance_token(p);
+        advance_token(p);
+        assert(p->current->type = INTEGER);
+        inst.idx_from_top = (size_t)p->current->integer;
+        advance_token(p);
+    
     // math
     } else if (strcmp(p->current->ident, "add") == 0) {
         inst.code = OP_ADD;

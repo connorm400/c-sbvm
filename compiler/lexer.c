@@ -195,7 +195,7 @@ extern tokens* lexer_collect(lex* l) {
 
     for (token* t = lex_nexttoken(l); t->type != T_EOF; t = lex_nexttoken(l)) {
         if (vec.capacity <= vec.len) {
-            vec.capacity += vec.capacity / 3;
+            vec.capacity *= 2;
             vec.arr = realloc(vec.arr, vec.capacity * sizeof(token*));
             assert(vec.arr && "buy more ram");
         }

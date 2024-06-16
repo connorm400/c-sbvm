@@ -116,7 +116,7 @@ static void parse_segment(parser* p) {
         #endif
 
         if (seg.size > arr_capacity) {
-            arr_capacity += arr_capacity / 3;
+            arr_capacity *= 2;
             seg.instructions = realloc(seg.instructions, arr_capacity * sizeof(Instruction));
             assert(seg.instructions && "buy more ram");
         }
@@ -133,7 +133,7 @@ static void parse_segment(parser* p) {
     assert(seg.instructions && "buy more ram");
     
     if (p->segments.len >= p->segments.capacity) {
-        p->segments.capacity += p->segments.capacity / 3;
+        p->segments.capacity *= 2;
         p->segments.arr = realloc(p->segments.arr, p->segments.capacity * sizeof(Segment));
         assert(p->segments.arr && "buy more ram");
     }
@@ -163,7 +163,7 @@ static Instruction parse_instruction(parser* p) {
                 
                 // push to stringtable
                 if (p->stringtable.capacity <= p->stringtable.len) {
-                    p->stringtable.capacity += p->stringtable.capacity / 3;
+                    p->stringtable.capacity *= 2;
                     p->stringtable.arr = realloc(p->stringtable.arr, p->stringtable.capacity * sizeof(char*));
                     assert(p->stringtable.arr && "buy more ram");
                 }
@@ -243,7 +243,7 @@ static Instruction parse_jump(parser* p, OpCode t) {
 static void add_label(parser* p) {
     assert(p->current->type == LABEL);
     if (p->labels.capacity <= p->labels.len) {
-        p->labels.capacity += p->labels.capacity / 3;
+        p->labels.capacity *= 2;
         p->labels.arr = realloc(p->labels.arr, p->labels.capacity * sizeof(char**));
         assert(p->labels.arr && "buy more ram");
     }

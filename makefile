@@ -13,6 +13,6 @@ runrelease:
 	./a.out prog
 
 install:
-	gcc -o compile compile.c vm.c stack.c ./compiler/lexer.c ./compiler/parser.c  
-	gcc -o run run.c vm.c stack.c  ./compiler/lexer.c ./compiler/parser.c  
+	gcc -o compile compile.c vm.c stack.c ./compiler/lexer.c ./compiler/parser.c 
+	gcc -o run run.c vm.c stack.c  ./compiler/lexer.c ./compiler/parser.c 
 

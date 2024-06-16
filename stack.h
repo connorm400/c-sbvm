@@ -5,10 +5,9 @@
 
 #include <stdint.h>
 #include <stddef.h>
-
 typedef enum { LT, GT, EQ } comparisons;
 
-typedef struct {
+typedef struct StackItem {
     enum { T_STR, T_INT, T_NULL, T_CMP } type;
     union {
         size_t str_idx;
@@ -18,11 +17,11 @@ typedef struct {
 } StackItem;
 
 static struct {
-    size_t size;
-    StackItem arr[STACK_SIZE];
-} stack = { .size = 0 };
+    size_t size, capacity;
+    StackItem* arr;
+} stack = { .size = 0, .capacity = 0 };
 
-extern int stack_push(StackItem item);
+extern void stack_push(StackItem item);
 extern StackItem stack_pop();
 extern StackItem stack_dig(size_t idx_from_top);
 //extern int stack_remove(size_t idx_from_top);

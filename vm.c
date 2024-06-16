@@ -29,11 +29,11 @@ extern int eval(Segment* segments, char** stringtable) {
         switch (segments[idx].instructions[i].code) {
             // stack operations
             case OP_PUSH:
-                assert(!stack_push(segments[idx].instructions[i].item));
+                stack_push(segments[idx].instructions[i].item);
                 break;
             case OP_DUP:
                 StackItem item = stack_dig(0);
-                assert(!stack_push(item));
+                stack_push(item);
                 break;
             /*
             case OP_RM:
@@ -41,7 +41,7 @@ extern int eval(Segment* segments, char** stringtable) {
                 break;
                 */
             case OP_DIG:
-                assert(!stack_push(stack_dig(segments[idx].instructions[i].idx_from_top)));
+                stack_push(stack_dig(segments[idx].instructions[i].idx_from_top));
                 break;
             case OP_DISCARD:
                 stack_pop();
@@ -67,7 +67,7 @@ extern int eval(Segment* segments, char** stringtable) {
                 else if (a.integer < b.integer) cmp = GT;
 
                 StackItem res = { .type = T_CMP, .cmp = cmp };
-                assert(!stack_push(res));
+                stack_push(res);
                 break;
             
             // control flow / jumps

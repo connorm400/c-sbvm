@@ -1,23 +1,24 @@
 #include "stack.h"
 #include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 
-extern int stack_push(StackItem item) {
-    if (stack.size == STACK_SIZE) return -1;
-
-    stack.size++;
-    stack.arr[stack.size] = item;
-    return 0;
+extern void stack_push(StackItem item) {
+    if (stack.size >= stack.capacity) {
+        stack.capacity = stack.capacity == 0 ? 1 : stack.capacity * 2;
+        stack.arr = (StackItem*)realloc(stack.arr, sizeof(StackItem) * stack.capacity);
+        assert(stack.arr && "buy more ram");
+    }
+    stack.arr[stack.size++] = item;
 }
 
 extern StackItem stack_pop() {
-    if (stack.size == 0) return (StackItem) { .type = T_NULL };
-    stack.size--;
-    return stack.arr[stack.size + 1];
+    return (stack.size == 0) ? (StackItem) { .type = T_NULL } : stack.arr[--stack.size];
 }
 
 extern StackItem stack_dig(size_t idx_from_top) {
-    if (idx_from_top > stack.size) return (StackItem) { .type = T_NULL };
-    return stack.arr[stack.size - idx_from_top];
+    if (idx_from_top >= stack.size) return (StackItem) { .type = T_NULL };
+    return stack.arr[stack.size - 1 - idx_from_top];
 }
 
 /*

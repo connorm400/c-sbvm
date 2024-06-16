@@ -1,8 +1,6 @@
 #ifndef STACH_HEADER_
 #define STACK_HEADER_
 
-#define STACK_SIZE 100
-
 #include <stdint.h>
 #include <stddef.h>
 typedef enum { LT, GT, EQ } comparisons;

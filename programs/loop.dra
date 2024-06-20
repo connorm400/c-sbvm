@@ -10,27 +10,27 @@
 ; }
 
 %start {
-    p(0) ; push our starting value for the increment
+    0 ; push our starting value for the increment
     jmp(loop) ; jump into the loop
 }
 
 %loop {
-    p("increment #") print
+    "increment #" print
     dup print ; print number, leaving it alone
     cr print
     dup ; duplicate the increment for the compare
-    p(10) ; push the 10 to compare with
+    10 ; push the 10 to compare with
     cmp
     je(end) ; if it equals then jump to the end
-    p(1) ; add 1 to the increment value
+    1 ; add 1 to the increment value
     add
     jmp(loop) ; restart the loop
 }
 
 %end {
-    p("done.")
+    "done."
     print
     cr print
-    p(0)
+    0
     exit
 }

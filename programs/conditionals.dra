@@ -1,28 +1,28 @@
 %start {
-    p("is 1 more or less than 2? lets find out!")
+    "is 1 more or less than 2? lets find out!"
     print
     cr print 
-    p(1)
-    p(2)
+    1
+    2
     cmp
     jlt(less-than)
     jmp(more-than)
 }
 
 %less-than {
-    p("its less.")
+    "its less."
     print
     jmp(end)
 }
 
 %more-than {
-    p("its more.")
+    "its more."
     print
     jmp(end)
 }
 
 %end {
     cr print
-    p(0)
+    0
     exit
 }

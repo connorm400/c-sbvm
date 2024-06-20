@@ -142,15 +142,12 @@ static void parse_segment(parser* p) {
 }
 
 static Instruction parse_instruction(parser* p) {
-    assert(p->current->type == IDENT);
     Instruction inst = {0};
     
     // TODO: all the rest of the instructions to parse
     // PUSH OPCODE
-    if (strcmp(p->current->ident, "p") == 0) {
+    if (p->current->type != IDENT) {
         inst.code = OP_PUSH;
-        advance_token(p); // advance past p
-        advance_token(p); // advance past (
         
         switch (p->current->type) {
             case INTEGER:
@@ -178,7 +175,6 @@ static Instruction parse_instruction(parser* p) {
                 inst.item.type = T_NULL;
                 break;
         }
-        advance_token(p);
 
     // jumps
     } else if (strcmp(p->current->ident, "jmp") == 0) {

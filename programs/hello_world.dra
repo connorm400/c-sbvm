@@ -1,8 +1,8 @@
 %start {
-    p("hello, world!")
+    "hello, world!"
     print
     cr
     print
-    p(0)
+    0
     exit
 }

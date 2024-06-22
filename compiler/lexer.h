@@ -9,6 +9,7 @@ typedef struct {
     size_t cursor;
     size_t input_len;
     char ch;
+    char* error;
 } lex;
 
 extern lex* lex_new(const char* input);

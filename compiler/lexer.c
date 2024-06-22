@@ -74,10 +74,7 @@ static void _lex_skip_whitespace(lex* l) {
     while (l->ch == ' ' || l->ch == '\t' || l->ch == '\n' || l->ch == '\r' || l->ch == ';') {
         if (l->ch == ';') {
             while (l->ch != '\n') {
-                if (l->ch == '\0') {
-                    fprintf(stderr, "end of file reached\n");
-                    exit(-1);
-                }
+                if (l->ch == '\0') return;
                 _lex_nextchar(l);
             }
         }

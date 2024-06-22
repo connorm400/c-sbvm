@@ -9,24 +9,21 @@
 #include <stdlib.h>
 
 int main(int argc, char** argv) {
-    assert(argc == 3 && "compile <input.dra> <ouput>");
+    if (argc != 3) {
+        fprintf(stderr, "%s: <input.dra> <output>\n", argv[0]);
+        exit(-1);
+    }
     
     // open and read input file
     FILE* input = fopen(argv[1], "rb");
     assert(input && "error opening file");
 
-    #ifdef __linux__
-
-    int fd = fileno(input);
-    struct stat statbuf;
-    assert(!fstat(fd, &statbuf));
-    size_t input_filesize = (size_t)statbuf.st_size / sizeof(char);
-    char* inputfilebuf = (char*)malloc(sizeof(char) * input_filesize);
+    fseek(input, 0, SEEK_END);
+    size_t input_filesize = (size_t)ftell(input);
+    fseek(input, 0, SEEK_SET);
+    char* inputfilebuf = malloc(input_filesize);
     assert(inputfilebuf && "buy more ram");
     getdelim(&inputfilebuf, &input_filesize, '\0', input);
-    #else
-    #error we only support linux right now sorry
-    #endif
 
     fclose(input);
 

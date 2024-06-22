@@ -16,7 +16,10 @@ int main(int argc, char** argv) {
     
     // open and read input file
     FILE* input = fopen(argv[1], "rb");
-    assert(input && "error opening file");
+    if (input == NULL) {
+        fprintf(stderr, "failed to open file %s\n", argv[1]);
+        exit(-1);
+    }
 
     fseek(input, 0, SEEK_END);
     size_t input_filesize = (size_t)ftell(input);
@@ -46,7 +49,11 @@ int main(int argc, char** argv) {
     }
 
     FILE* f = fopen(argv[2], "wb");
-    assert(f && "failled to open file");
+    if (input == NULL) {
+        fprintf(stderr, "failed to open file %s\n", argv[2]);
+        exit(-1);
+    }
+    
     // write stringtable
     {
         fwrite(&res.stringtable.len, sizeof(size_t), 1, f);

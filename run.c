@@ -5,9 +5,15 @@
 #include "vm.h"
 
 int main(int argc, char** argv) {
-    assert(argc == 2 && "lacking arguments");
+    if (argc != 2) {
+        fprintf(stderr, "%s: <inputfile>\n", argv[0]);
+        exit(-1);
+    }
     FILE* f = fopen(argv[1], "rb");
-    assert(f && "failed to open file");
+    if (f == NULL) {
+        fprintf(stderr, "failed to open file %s\n", argv[1]);
+        exit(-1);
+    }
 
     size_t strarrsize;
     fread(&strarrsize, sizeof(size_t), 1, f);

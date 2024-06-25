@@ -44,7 +44,8 @@ int main(int argc, char** argv) {
     #endif
 
     if (!res.r) {
-        fprintf(stderr, "COMPILER ERROR: %s", res.err_msg);
+        fprintf(stderr, "COMPILER ERROR: %s\n", res.err_msg);
+        if (res.err_dealloc != NULL) res.err_dealloc(res.err_msg);
         exit(1);
     }
 

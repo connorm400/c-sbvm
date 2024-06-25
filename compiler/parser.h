@@ -16,6 +16,8 @@ typedef struct {
     token* current;
     cstr_vec stringtable;
 
+    char* err_msg;
+    void (*err_dealloc)(void*);
     // segment vec
     struct {
         Segment* arr;
@@ -32,7 +34,7 @@ typedef struct {
 
 typedef struct {
     bool r; // result - wether or not it worked
-    char* err_msg;
+    char* err_msg; void (*err_dealloc)(void*);
     cstr_vec stringtable;
     size_t segment_nmemb;
     Segment* segments;

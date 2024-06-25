@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
         // allocate and write instructions
         fread(&segments[i].size, sizeof(size_t), 1, f);
         segments[i].instructions = (Instruction*)malloc(sizeof(Instruction) * segments[i].size);
-        assert(segments[i].instructions);
+        assert(segments[i].instructions && "buy more ram");
         fread(segments[i].instructions, sizeof(Instruction), segments[i].size, f);
 
         #if DEBUG

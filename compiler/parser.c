@@ -14,8 +14,8 @@ parser* parser_new(lex* lexer) {
     temp->cursor = 0;
     temp->input = lexer_collect(lexer);
     free(lexer);
-    
-    assert(temp->input->len >= 1 && "input is empty");
+
+    assert(temp->input->len > 0);
     temp->current = temp->input->arr[0];
 
     temp->stringtable.capacity = DEAFULT_STRINGTABLE_SIZE;
@@ -34,6 +34,9 @@ parser* parser_new(lex* lexer) {
     assert(temp->labels.arr && "buy more ram"); 
     temp->labels.capacity = DEFAULT_LABELS_SIZE;
     temp->labels.len = 0;
+
+    temp->err_msg = NULL;
+    temp->err_dealloc = NULL;
 
     return temp;
 }
@@ -70,12 +73,11 @@ extern parser_res parse(parser* p) {
 
     // here we do the rest
     while (p->current->type != T_EOF) {
-        if (p->current->type == LABEL) {
-            parse_segment(p); 
-            
-        } else {
+        parse_segment(p); 
+    
+        if (p->err_msg != NULL) {
             res.r = false;
-            res.err_msg = "non-label found outside of segment";
+            res.err_msg = p->err_msg;
             return res;
         }
         advance_token(p);
@@ -94,6 +96,8 @@ extern parser_res parse(parser* p) {
     res.stringtable.arr = p->stringtable.arr;
     res.stringtable.len = p->stringtable.len;
     res.stringtable.capacity = p->stringtable.capacity;
+
+    res.err_dealloc = NULL;
 
     return res;
 }
@@ -129,8 +133,10 @@ static void parse_segment(parser* p) {
     }
     
     // realloc to free up memory
-    seg.instructions = realloc(seg.instructions, seg.size * sizeof(Instruction));
-    assert(seg.instructions && "buy more ram");
+    if (seg.size != arr_capacity && seg.size != 0) {
+        seg.instructions = realloc(seg.instructions, seg.size * sizeof(Instruction));
+        assert(seg.instructions && "buy more ram");
+    }
     
     if (p->segments.len >= p->segments.capacity) {
         p->segments.capacity *= 2;
@@ -205,7 +211,8 @@ static Instruction parse_instruction(parser* p) {
         // advance over dig and (
         advance_token(p);
         advance_token(p);
-        assert(p->current->type = INTEGER);
+        
+        if (p->current->type != INTEGER) p->err_msg = "dig instruction must take integer";
         inst.idx_from_top = (size_t)p->current->integer;
         advance_token(p);
     
@@ -221,7 +228,27 @@ static Instruction parse_instruction(parser* p) {
     } else if (strcmp(p->current->ident, "cr") == 0) {
         inst =  (Instruction) { .code = OP_PUSH, .item = { .type = T_STR, .str_idx = 0 }};
     } else {
-        assert(0 && "not implemented");
+
+        char* msg1 = "identifier '";
+        size_t msg1len = strlen(msg1);
+
+        char* msg2 = p->current->ident;
+        size_t msg2len = strlen(msg2);
+
+        char* msg3 = "' not matched";
+        size_t msg3len = strlen(msg3);
+
+        size_t msglen = msg1len + msg2len + msg3len + 1;
+        p->err_msg = malloc(sizeof(char) * msglen);
+        assert(p->err_msg && "buy more ram");
+
+        strcpy(p->err_msg, msg1);
+        strcpy(p->err_msg + msg1len, msg2);
+        strcpy(p->err_msg + msg1len + msg2len, msg3);
+        p->err_msg[msglen - 1] = '\0';
+        
+        p->err_dealloc = free;
+
     }
 
     return inst;
@@ -254,7 +281,30 @@ static size_t find_label(parser* p) {
             return i;
         }
     }
-    assert(0 && "PANIC - LABEL NOT FOUND");
+
+    char* msg1 = "label '";
+    size_t msg1len = strlen(msg1);
+
+    char* msg2 = p->current->label;
+    size_t msg2len = strlen(msg2);
+
+    char* msg3 = "' not found";
+    size_t msg3len = strlen(msg3);
+
+    size_t msglen = msg1len + msg2len + msg3len + 1;
+    p->err_msg = malloc(sizeof(char) * msglen);
+    assert(p->err_msg && "buy more ram");
+
+    strcpy(p->err_msg, msg1);
+    strcpy(p->err_msg + msg1len, msg2);
+    strcpy(p->err_msg + msg1len + msg2len, msg3);
+
+    
+    p->err_msg[msglen - 1] = '\0';
+
+    p->err_dealloc = free;    
+
+    return 0;
 }
 
 extern void parser_free(parser* p) {

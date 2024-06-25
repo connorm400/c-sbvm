@@ -276,6 +276,7 @@ static void add_label(parser* p) {
 }
 
 static size_t find_label(parser* p) {
+    if (p->current->type != IDENT) p->err_msg = "jmp must take ident/label as argument";
     for (size_t i = 0; i < p->labels.len; i++) {
         if (strcmp(p->labels.arr[i], p->current->label) == 0) {
             return i;

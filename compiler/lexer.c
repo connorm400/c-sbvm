@@ -7,8 +7,9 @@
 
 #define LEXER_COLLECTOR_STARTING_SIZE 100
 
-extern lex* lex_new(const char* input) {
-    lex* temp = (lex*)malloc(sizeof(lex));
+extern lex* lex_new(const char* input) 
+{
+    lex* temp = malloc(sizeof(lex));
     assert(temp && "buy more ram");
     temp->input = input;
     temp->input_len = strlen(input);
@@ -18,7 +19,8 @@ extern lex* lex_new(const char* input) {
     return temp;
 }
 
-extern token* lex_nexttoken(lex* l) {
+extern token* lex_nexttoken(lex* l) 
+{
     _lex_skip_whitespace(l);
 
     token* tok;
@@ -63,14 +65,14 @@ extern token* lex_nexttoken(lex* l) {
     return tok;
 }
 
-
-
-static void _lex_nextchar(lex* l) {
+static void _lex_nextchar(lex* l) 
+{
     l->cursor++;
     l->ch = l->input_len >= l->cursor ? l->input[l->cursor] : '\0';
 }
 
-static void _lex_skip_whitespace(lex* l) {
+static void _lex_skip_whitespace(lex* l) 
+{
     while (l->ch == ' ' || l->ch == '\t' || l->ch == '\n' || l->ch == '\r' || l->ch == ';') {
         if (l->ch == ';') {
             while (l->ch != '\n') {
@@ -82,7 +84,8 @@ static void _lex_skip_whitespace(lex* l) {
     }
 }
 
-static char* __read(lex* l,  bool(*pred)(char)) { 
+static char* __read(lex* l,  bool(*pred)(char)) 
+{ 
     size_t position = l->cursor;
     while ((*pred)(l->ch)) {
         if (l->ch == '\0') {
@@ -91,7 +94,7 @@ static char* __read(lex* l,  bool(*pred)(char)) {
         }
         _lex_nextchar(l);
     }
-    char* newstr = (char*)malloc((l->cursor - position + 1) * sizeof(char));
+    char* newstr = malloc((l->cursor - position + 1) * sizeof(char));
     assert(newstr && "buy more ram");
     memcpy(newstr, l->input + position, (l->cursor - position) * sizeof(char));
     newstr[l->cursor - position] = '\0';
@@ -99,7 +102,8 @@ static char* __read(lex* l,  bool(*pred)(char)) {
 }
 
 static bool is_digit(char c) { return isdigit(c); }
-static token* _read_integer(lex* l) {
+static token* _read_integer(lex* l) 
+{
     char* str = __read(l, is_digit);
     token* tok = _token_new(INTEGER);
     tok->integer = atoi(str);
@@ -108,10 +112,12 @@ static token* _read_integer(lex* l) {
     return tok;
 }
 
-static bool _is_ident_letter(char c) {
+static bool _is_ident_letter(char c) 
+{
     return isalpha(c) || c == '!' || c == '?' || c == '-' ;
 }
-static token* _read_ident(lex* l) {
+static token* _read_ident(lex* l) 
+{
     char* str = __read(l, _is_ident_letter);
     token* tok = _token_new(IDENT);
     tok->ident = str;
@@ -119,7 +125,8 @@ static token* _read_ident(lex* l) {
 }
 
 static bool is_not_unquote(char c) { return c != '"'; }
-static token* _read_string(lex* l) {
+static token* _read_string(lex* l) 
+{
     _lex_nextchar(l);
     char* str = __read(l, is_not_unquote);
     token* tok = _token_new(STRING);
@@ -127,25 +134,29 @@ static token* _read_string(lex* l) {
     return tok;
 }
 
-extern void lex_free(lex* l) {
+extern void lex_free(lex* l) 
+{
     free(l);
 }
 
-extern void token_free(token* t) {
+extern void token_free(token* t) 
+{
     if (t->type == STRING || t->type == IDENT || t->type == LABEL)
         free(t->string); /* all the union member will be at the same spot so this should work */
 
     free(t);
 }
 
-token* _token_new(token_type type) {
-    token* t = (token*)malloc(sizeof(token));
+token* _token_new(token_type type) 
+{
+    token* t = malloc(sizeof(token));
     assert(t && "buy more ram");
     t->type = type;
     return t;
 }
 
-extern void print_token(token* t) {
+extern void print_token(token* t) 
+{
     switch (t->type) {
         case IDENT:
             printf("[Identifier %s]", t->ident);
@@ -180,14 +191,15 @@ extern void print_token(token* t) {
     }
 }
 
-extern tokens* lexer_collect(lex* l) {
+extern tokens* lexer_collect(lex* l) 
+{
     // making sort of a vector class for this
     struct {
         token** arr;
         size_t len;
         size_t capacity;
     } vec = { .len = 0, .capacity = LEXER_COLLECTOR_STARTING_SIZE };
-    vec.arr = (token**)malloc(vec.capacity * sizeof(token*));
+    vec.arr = malloc(vec.capacity * sizeof(token*));
     assert(vec.arr && "buy more ram");
 
     for (token* t = lex_nexttoken(l); t->type != T_EOF; t = lex_nexttoken(l)) {
@@ -203,14 +215,15 @@ extern tokens* lexer_collect(lex* l) {
     
     // reallocate the array so its more memory efficient
     vec.arr = realloc(vec.arr, vec.len * sizeof(token*));
-    tokens* temp = (tokens*)malloc(sizeof(tokens));
+    tokens* temp = malloc(sizeof(tokens));
     assert(temp && "buy more ram");
     temp->len = vec.len;
     temp->arr = vec.arr;
     return temp;
 }
 
-extern void tokens_free(tokens* t) {
+extern void tokens_free(tokens* t) 
+{
     for (size_t i = 0; i < t->len; i++) {
         token_free(t->arr[i]);
     }

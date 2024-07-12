@@ -19,6 +19,10 @@ typedef enum {
 
     OP_PRINT, // pops the top elements and prints it
 
+    OP_CALL, // call a function - functions still utilize labels, but are different from jumps in that they
+             // can be returned
+    OP_RET, // return to previously set return address
+
     // conditionals and control flow
     OP_CMP,
     // jumps use segment_idx union member
@@ -52,5 +56,10 @@ typedef struct {
 extern void inst_print(Instruction inst, char** stringtable);
 void item_print(StackItem item, char** stringtable);
 extern int eval(Segment* segments, char** stringtable);
+
+struct CallerAddress {
+    size_t segment_idx;
+    size_t inst_idx;
+};
 
 #endif

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
 #include "vm.h"
 
 #define MATH_OP(Infix) \
@@ -10,38 +11,41 @@
      stack_push(res);}
 
 #define JMP \
-    { idx = segments[idx].instructions[i].segment_idx; \
-      i = 0; \
-      goto jmppoint;} 
+    { idx = segments[idx].instructions[inst_num].segment_idx; \
+      inst_num = 0; \
+      continue; } 
 
-extern int eval(Segment* segments, char** stringtable) {
+extern int eval(Segment* segments, char** stringtable) 
+{
     size_t idx = 0; // segment index. start with 0 (main/start)
-    for (size_t i = 0 ;; i++) {
+    size_t inst_num = 0;
+
+    struct {
+        size_t len, capacity;
+        struct CallerAddress* arr;
+    } call_stack = { .len = 0, .capacity = 0, .arr = NULL };
+
+    for (;;) {
         // ok I know that gotos are bad but I need this to skip the for loop increment its fine ok
-        jmppoint:
         
         #if DEBUG
         printf("on segment %s\n", segments[idx].name);
-        printf("i: %zu\n", i);
-        printf("instruction: "); inst_print(segments[idx].instructions[i], stringtable); putchar('\n'); 
+        printf("inst_num: %zu\n", inst_num);
+        printf("instruction: "); inst_print(segments[idx].instructions[inst_num], stringtable); putchar('\n'); 
         #endif
 
-        switch (segments[idx].instructions[i].code) {
+        switch (segments[idx].instructions[inst_num].code) {
             // stack operations
             case OP_PUSH:
-                stack_push(segments[idx].instructions[i].item);
+                stack_push(segments[idx].instructions[inst_num].item);
                 break;
             case OP_DUP:
                 StackItem item = stack_dig(0);
                 stack_push(item);
                 break;
-            /*
-            case OP_RM:
-                assert(!stack_remove(segments[idx].instructions[i].idx_from_top));
-                break;
-                */
+
             case OP_DIG:
-                stack_push(stack_dig(segments[idx].instructions[i].idx_from_top));
+                stack_push(stack_dig(segments[idx].instructions[inst_num].idx_from_top));
                 break;
             case OP_DISCARD:
                 stack_pop();
@@ -58,7 +62,7 @@ extern int eval(Segment* segments, char** stringtable) {
             case OP_DIVIDE: MATH_OP(/); break;
 
             // comparison
-            case OP_CMP:
+            case OP_CMP: {
                 StackItem a = stack_pop();
                 StackItem b = stack_pop();
                 comparisons cmp;
@@ -68,8 +72,36 @@ extern int eval(Segment* segments, char** stringtable) {
 
                 StackItem res = { .type = T_CMP, .cmp = cmp };
                 stack_push(res);
-                break;
+            } break;
             
+
+            // function handling
+            case OP_CALL: {
+                if (call_stack.len >= call_stack.capacity) {
+                    call_stack.capacity = call_stack.capacity == 0 ? 1 : call_stack.capacity * 2;
+                    call_stack.arr = realloc(call_stack.arr, call_stack.capacity * sizeof(struct CallerAddress));
+                    assert(call_stack.arr && "buy more ram");
+                }
+
+                call_stack.arr[call_stack.len++] = (struct CallerAddress) {
+                    .inst_idx = inst_num,
+                    .segment_idx = idx,
+                };
+
+                JMP;
+            } break;
+
+            case OP_RET: {
+                assert(call_stack.len >= 1);
+
+                struct CallerAddress ca = call_stack.arr[--call_stack.len];
+
+                inst_num = ca.inst_idx + 1;
+                idx = ca.segment_idx;
+
+                continue;
+            } break;
+
             // control flow / jumps
             case OP_JMP: JMP; break;
             case OP_JE:  if (stack_pop().cmp == EQ) JMP; break;
@@ -82,67 +114,42 @@ extern int eval(Segment* segments, char** stringtable) {
                 break;
 
         }
+        inst_num++;
     }
+
+    free(call_stack.arr);
 }
 
-extern void inst_print(Instruction inst, char** stringtable) {
+extern void inst_print(Instruction inst, char** stringtable) 
+{
     switch (inst.code) {
         case OP_PUSH:
             printf("{push instruction; item ");
             item_print(inst.item, stringtable);
             putchar('}');
             break;
-        case OP_DUP:
-            printf("{duplicate instruction}");
-            break;
-        /*case OP_RM:
-            printf("{element removal instruction instruction}");
-            break;*/
-        case OP_DIG:
-            printf("{dig instruction}");
-            break;
-        case OP_DISCARD:
-            printf("{discard instruction}");
-        case OP_ADD:
-            printf("{add instruction}");
-            break;
-        case OP_SUBTRACT:
-            printf("{subtract instruction}");
-            break;
-        case OP_MULTIPLY:
-            printf("{multiply instruction}");
-            break;
-        case OP_DIVIDE:
-            printf("{divide instruction}");
-            break;
-        case OP_PRINT:
-            printf("{print instruction}");
-            break;
-        case OP_CMP:
-            printf("{compare instruction}");
-            break;
-        case OP_JNE:
-            printf("{jump if not equal instruction}");
-            break;
-        case OP_JE:
-            printf("{jump if equal instruction}");
-            break;
-        case OP_JMP:
-            printf("{jump instruction}");
-            break;
-        case OP_JLT:
-            printf("{jump if less than instruction}");
-            break;
-        case OP_JGT:
-            printf("{jump if greater than instruction}");
-            break;
-        case OP_EXIT:
-            printf("{exit instruction}");
-            break;
+        case OP_DUP: printf("{duplicate instruction}"); break;
+        case OP_DIG: printf("{dig instruction}"); break;
+        case OP_DISCARD: printf("{discard instruction}"); break;
+        case OP_ADD: printf("{add instruction}"); break;
+        case OP_SUBTRACT: printf("{subtract instruction}"); break;
+        case OP_MULTIPLY: printf("{multiply instruction}"); break;
+        case OP_DIVIDE: printf("{divide instruction}"); break;
+        case OP_PRINT: printf("{print instruction}"); break;
+        case OP_CALL: printf("{call instruction}"); break;
+        case OP_RET: printf("{return instruction}"); break;
+        case OP_CMP: printf("{compare instruction}"); break;
+        case OP_JNE: printf("{jump if not equal instruction}"); break;
+        case OP_JE: printf("{jump if equal instruction}"); break;
+        case OP_JMP: printf("{jump instruction}"); break;
+        case OP_JLT: printf("{jump if less than instruction}"); break;
+        case OP_JGT: printf("{jump if greater than instruction}"); break;
+        case OP_EXIT: printf("{exit instruction}"); break;
     }
 }
 
-void item_print(StackItem item, char** stringtable) {
+void item_print(StackItem item, char** stringtable) 
+{
     switch (item.type) {
         case T_NULL:
             printf("null");

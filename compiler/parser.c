@@ -8,8 +8,9 @@
 #define DEAFULT_STRINGTABLE_SIZE 10
 #define DEFAULT_LABELS_SIZE 5
 
-parser* parser_new(lex* lexer) {
-    parser* temp = (parser*)malloc(sizeof(parser));
+parser* parser_new(lex* lexer) 
+{
+    parser* temp = malloc(sizeof(parser));
     assert(temp && "buy more ram");
     temp->cursor = 0;
     temp->input = lexer_collect(lexer);
@@ -20,7 +21,7 @@ parser* parser_new(lex* lexer) {
 
     temp->stringtable.capacity = DEAFULT_STRINGTABLE_SIZE;
     temp->stringtable.len = 0;
-    temp->stringtable.arr = (char**)malloc(sizeof(char*) * DEAFULT_STRINGTABLE_SIZE);
+    temp->stringtable.arr = malloc(sizeof(char*) * DEAFULT_STRINGTABLE_SIZE);
     assert(temp->stringtable.arr && "buy more ram");
     temp->stringtable.arr[0] = "\n";
     temp->stringtable.len++;
@@ -30,7 +31,7 @@ parser* parser_new(lex* lexer) {
     temp->segments.capacity = DEFAULT_SEGMENT_SIZE;
     temp->segments.len = 0;
 
-    temp->labels.arr = (char**)malloc(sizeof(char*) * DEFAULT_LABELS_SIZE);
+    temp->labels.arr = malloc(sizeof(char*) * DEFAULT_LABELS_SIZE);
     assert(temp->labels.arr && "buy more ram"); 
     temp->labels.capacity = DEFAULT_LABELS_SIZE;
     temp->labels.len = 0;
@@ -41,19 +42,23 @@ parser* parser_new(lex* lexer) {
     return temp;
 }
 
-static void advance_token(parser* p) {
+static void advance_token(parser* p) 
+{
     p->cursor++;
     p->current = p->input->len > p->cursor ? p->input->arr[p->cursor] : _token_new(T_EOF);
 }
 
-static void reset_parser_pos(parser* p) {
+static void reset_parser_pos(parser* p) 
+{
     p->cursor = 0;
     p->current = p->input->arr[0];
 }
 
-extern parser_res parse(parser* p) {
-    parser_res res = {0};
+extern parser_res parse(parser* p) 
+{
+    parser_res res;
     res.r = true;
+    res.err_dealloc = NULL;
 
     // first time we go through it we are just looking for label names
     while (p->current->type != T_EOF) {
@@ -97,12 +102,11 @@ extern parser_res parse(parser* p) {
     res.stringtable.len = p->stringtable.len;
     res.stringtable.capacity = p->stringtable.capacity;
 
-    res.err_dealloc = NULL;
-
     return res;
 }
 
-static void parse_segment(parser* p) {
+static void parse_segment(parser* p) 
+{
     Segment seg = {0};
     seg.name = p->current->label;
     seg.size = 0;
@@ -112,7 +116,7 @@ static void parse_segment(parser* p) {
     advance_token(p); // move past right bracket
     
     size_t arr_capacity = DEFAULT_SEGMENT_SIZE;
-    seg.instructions = (Instruction*)malloc(sizeof(Instruction) * arr_capacity);
+    seg.instructions = malloc(sizeof(Instruction) * arr_capacity);
     assert(seg.instructions && "buy more ram");
     while (p->current->type != RSQUIRLY) {
         #if DEBUG
@@ -147,8 +151,9 @@ static void parse_segment(parser* p) {
     p->segments.len++;
 }
 
-static Instruction parse_instruction(parser* p) {
-    Instruction inst = {0};
+static Instruction parse_instruction(parser* p) 
+{
+    Instruction inst;
     
     // TODO: all the rest of the instructions to parse
     // PUSH OPCODE
@@ -194,6 +199,14 @@ static Instruction parse_instruction(parser* p) {
     } else if (strcmp(p->current->ident, "jlt") == 0) {
         inst = parse_jump(p, OP_JLT);
     
+    // function calls n stuff
+    } else if (strcmp(p->current->ident, "call") == 0) {
+        advance_token(p); // advance past call
+        advance_token(p); // advance past (
+        if (p->current->type != IDENT) p->err_msg = "call must take label as argument";
+
+        inst.code = OP_CALL;
+        inst.segment_idx = find_label(p);
     
     // other
     } else if (strcmp(p->current->ident, "exit") == 0) {
@@ -215,6 +228,10 @@ static Instruction parse_instruction(parser* p) {
         if (p->current->type != INTEGER) p->err_msg = "dig instruction must take integer";
         inst.idx_from_top = (size_t)p->current->integer;
         advance_token(p);
+
+    } else if (strcmp(p->current->ident, "ret") == 0) {
+        inst.code = OP_RET;
+    
     
     // math
     } else if (strcmp(p->current->ident, "add") == 0) {
@@ -229,6 +246,7 @@ static Instruction parse_instruction(parser* p) {
         inst =  (Instruction) { .code = OP_PUSH, .item = { .type = T_STR, .str_idx = 0 }};
     } else {
 
+        // forgot sprintf existed here dw about it
         char* msg1 = "identifier '";
         size_t msg1len = strlen(msg1);
 
@@ -254,16 +272,19 @@ static Instruction parse_instruction(parser* p) {
     return inst;
 }
 
-static Instruction parse_jump(parser* p, OpCode t) {
+static Instruction parse_jump(parser* p, OpCode t) 
+{
     advance_token(p); // advance past jmp
     advance_token(p); // jump past (
+    if (p->current->type != IDENT) p->err_msg = "jmp must take ident/label as argument";
     Instruction inst = { .code = t, .segment_idx = find_label(p), };
     advance_token(p);
 
     return inst;
 }
 
-static void add_label(parser* p) {
+static void add_label(parser* p) 
+{
     assert(p->current->type == LABEL);
     if (p->labels.capacity <= p->labels.len) {
         p->labels.capacity *= 2;
@@ -275,8 +296,9 @@ static void add_label(parser* p) {
     p->labels.len++;
 }
 
-static size_t find_label(parser* p) {
-    if (p->current->type != IDENT) p->err_msg = "jmp must take ident/label as argument";
+static size_t find_label(parser* p) 
+{
+    
     for (size_t i = 0; i < p->labels.len; i++) {
         if (strcmp(p->labels.arr[i], p->current->label) == 0) {
             return i;
@@ -299,8 +321,6 @@ static size_t find_label(parser* p) {
     strcpy(p->err_msg, msg1);
     strcpy(p->err_msg + msg1len, msg2);
     strcpy(p->err_msg + msg1len + msg2len, msg3);
-
-    
     p->err_msg[msglen - 1] = '\0';
 
     p->err_dealloc = free;    
@@ -308,7 +328,8 @@ static size_t find_label(parser* p) {
     return 0;
 }
 
-extern void parser_free(parser* p) {
+extern void parser_free(parser* p) 
+{
     tokens_free(p->input);
     if (p->stringtable.arr != NULL) free(p->stringtable.arr);
     if (p->segments.arr != NULL) free(p->segments.arr);

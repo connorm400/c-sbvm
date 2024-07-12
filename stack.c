@@ -3,20 +3,23 @@
 #include <stdlib.h>
 #include <assert.h>
 
-extern void stack_push(StackItem item) {
+extern void stack_push(StackItem item) 
+{
     if (stack.size >= stack.capacity) {
         stack.capacity = stack.capacity == 0 ? 1 : stack.capacity * 2;
-        stack.arr = (StackItem*)realloc(stack.arr, sizeof(StackItem) * stack.capacity);
+        stack.arr = realloc(stack.arr, sizeof(StackItem) * stack.capacity);
         assert(stack.arr && "buy more ram");
     }
     stack.arr[stack.size++] = item;
 }
 
-extern StackItem stack_pop() {
+extern StackItem stack_pop() 
+{
     return (stack.size == 0) ? (StackItem) { .type = T_NULL } : stack.arr[--stack.size];
 }
 
-extern StackItem stack_dig(size_t idx_from_top) {
+extern StackItem stack_dig(size_t idx_from_top) 
+{
     if (idx_from_top >= stack.size) return (StackItem) { .type = T_NULL };
     return stack.arr[stack.size - 1 - idx_from_top];
 }

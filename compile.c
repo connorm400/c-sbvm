@@ -5,10 +5,10 @@
 #include "vm.h"
 #include "compiler/lexer.h"
 #include "compiler/parser.h"
-#include <sys/stat.h>
 #include <stdlib.h>
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
     if (argc != 3) {
         fprintf(stderr, "%s: <input.dra> <output>\n", argv[0]);
         exit(-1);

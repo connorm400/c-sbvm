@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include "vm.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
     if (argc != 2) {
         fprintf(stderr, "%s: <inputfile>\n", argv[0]);
         exit(-1);
@@ -18,14 +19,14 @@ int main(int argc, char** argv) {
     size_t strarrsize;
     fread(&strarrsize, sizeof(size_t), 1, f);
 
-    char** strings = (char**)malloc(sizeof(char*) * strarrsize);
+    char** strings = malloc(sizeof(char*) * strarrsize);
     assert(strings && "buy more ram");
 
     for (size_t i = 0; i < strarrsize; i++) {
         size_t strsize;
         fread(&strsize, sizeof(size_t), 1, f);
 
-        strings[i] = (char*)malloc(sizeof(char) * strsize);
+        strings[i] = malloc(sizeof(char) * strsize);
         assert(strings[i] && "buy more ram");
         
         fread(strings[i], sizeof(char), strsize, f);
@@ -48,20 +49,20 @@ int main(int argc, char** argv) {
     printf("number of segments: %zu;\n", segment_nmemb);
     #endif
 
-    Segment* segments = (Segment*)malloc(sizeof(Segment) * segment_nmemb);
+    Segment* segments = malloc(sizeof(Segment) * segment_nmemb);
     assert(segments && "buy more ram");
 
     for (size_t i = 0; i < segment_nmemb; i++) {
         // allocate and write name string
         size_t strsize;
         fread(&strsize, sizeof(size_t), 1, f);
-        segments[i].name = (char*)malloc(sizeof(char) * strsize);
+        segments[i].name = malloc(sizeof(char) * strsize);
         assert(segments[i].name && "buy more ram");
         fread(segments[i].name, sizeof(char), strsize, f);
 
         // allocate and write instructions
         fread(&segments[i].size, sizeof(size_t), 1, f);
-        segments[i].instructions = (Instruction*)malloc(sizeof(Instruction) * segments[i].size);
+        segments[i].instructions = malloc(sizeof(Instruction) * segments[i].size);
         assert(segments[i].instructions && "buy more ram");
         fread(segments[i].instructions, sizeof(Instruction), segments[i].size, f);
 

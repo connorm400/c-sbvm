@@ -4,3 +4,4 @@ prog
 compile
 run
 prog.dra
+.build/*

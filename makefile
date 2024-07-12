@@ -16,3 +16,6 @@ install:
 	gcc -o compile compile.c vm.c stack.c ./compiler/lexer.c ./compiler/parser.c 
 	gcc -o run run.c vm.c stack.c  ./compiler/lexer.c ./compiler/parser.c 
 
+installdebug:
+	gcc -o compile compile.c vm.c stack.c ./compiler/lexer.c ./compiler/parser.c -D DEBUG
+	gcc -o run run.c vm.c stack.c  ./compiler/lexer.c ./compiler/parser.c -D DEBUG

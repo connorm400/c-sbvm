@@ -94,10 +94,10 @@ extern int eval(Segment* segments, char** stringtable)
             case OP_RET: {
                 assert(call_stack.len >= 1);
 
-                struct CallerAddress ca = call_stack.arr[--call_stack.len];
+                struct CallerAddress* ca = call_stack.arr + (--call_stack.len);
 
-                inst_num = ca.inst_idx + 1;
-                idx = ca.segment_idx;
+                inst_num = ca->inst_idx + 1; // move onto the next instruction after the call
+                idx = ca->segment_idx;
 
                 continue;
             } break;

@@ -1,0 +1,14 @@
+%start {
+    "1 incremented is " print 
+
+    1 call(inc) print
+    "." print cr print
+
+    0 exit  
+}
+
+; function [ n -> n + 1]
+%inc {
+    1 add
+    ret
+}

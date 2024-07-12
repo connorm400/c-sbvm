@@ -207,6 +207,7 @@ static Instruction parse_instruction(parser* p)
 
         inst.code = OP_CALL;
         inst.segment_idx = find_label(p);
+        advance_token(p);
     
     // other
     } else if (strcmp(p->current->ident, "exit") == 0) {

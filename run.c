@@ -1,33 +1,28 @@
 #include <stdio.h>
-#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include "vm.h"
+#include "err_macro.h"
 
 int main(int argc, char** argv) 
 {
-    if (argc != 2) {
-        fprintf(stderr, "%s: <inputfile>\n", argv[0]);
-        exit(-1);
-    }
+    if (argc != 2) err_quit("%s: <inputfile>", argv[0]);
+    
     FILE* f = fopen(argv[1], "rb");
-    if (f == NULL) {
-        fprintf(stderr, "failed to open file %s\n", argv[1]);
-        exit(-1);
-    }
+    if (f == NULL) err_quit("failed to open file %s", argv[1]);
 
     size_t strarrsize;
     fread(&strarrsize, sizeof(size_t), 1, f);
 
     char** strings = malloc(sizeof(char*) * strarrsize);
-    assert(strings && "buy more ram");
+    CHECK_ALLOC(strings);
 
     for (size_t i = 0; i < strarrsize; i++) {
         size_t strsize;
         fread(&strsize, sizeof(size_t), 1, f);
 
         strings[i] = malloc(sizeof(char) * strsize);
-        assert(strings[i] && "buy more ram");
+        CHECK_ALLOC(strings[i]);
         
         fread(strings[i], sizeof(char), strsize, f);
     } 
@@ -50,20 +45,20 @@ int main(int argc, char** argv)
     #endif
 
     Segment* segments = malloc(sizeof(Segment) * segment_nmemb);
-    assert(segments && "buy more ram");
+    CHECK_ALLOC(segments);
 
     for (size_t i = 0; i < segment_nmemb; i++) {
         // allocate and write name string
         size_t strsize;
         fread(&strsize, sizeof(size_t), 1, f);
         segments[i].name = malloc(sizeof(char) * strsize);
-        assert(segments[i].name && "buy more ram");
+        CHECK_ALLOC(segments[i].name);
         fread(segments[i].name, sizeof(char), strsize, f);
 
         // allocate and write instructions
         fread(&segments[i].size, sizeof(size_t), 1, f);
         segments[i].instructions = malloc(sizeof(Instruction) * segments[i].size);
-        assert(segments[i].instructions && "buy more ram");
+        CHECK_ALLOC(segments[i].instructions);
         fread(segments[i].instructions, sizeof(Instruction), segments[i].size, f);
 
         #if DEBUG

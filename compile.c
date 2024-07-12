@@ -1,31 +1,25 @@
 #include <stdio.h>
-#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 #include "vm.h"
 #include "compiler/lexer.h"
 #include "compiler/parser.h"
 #include <stdlib.h>
+#include "err_macro.h"
 
 int main(int argc, char** argv) 
 {
-    if (argc != 3) {
-        fprintf(stderr, "%s: <input.dra> <output>\n", argv[0]);
-        exit(-1);
-    }
+    if (argc != 3) err_quit("%s: <input.dra> <output>", argv[0]);
     
     // open and read input file
     FILE* input = fopen(argv[1], "rb");
-    if (input == NULL) {
-        fprintf(stderr, "failed to open file %s\n", argv[1]);
-        exit(-1);
-    }
+    if (input == NULL) err_quit("failed to open file %s", argv[1]);
 
     fseek(input, 0, SEEK_END);
     size_t input_filesize = (size_t)ftell(input);
     fseek(input, 0, SEEK_SET);
     char* inputfilebuf = malloc(input_filesize);
-    assert(inputfilebuf && "buy more ram");
+    CHECK_ALLOC(inputfilebuf);
     getdelim(&inputfilebuf, &input_filesize, '\0', input);
 
     fclose(input);
@@ -46,14 +40,11 @@ int main(int argc, char** argv)
     if (!res.r) {
         fprintf(stderr, "COMPILER ERROR: %s\n", res.err_msg);
         if (res.err_dealloc != NULL) res.err_dealloc(res.err_msg);
-        exit(1);
+        exit(-1);
     }
 
     FILE* f = fopen(argv[2], "wb");
-    if (input == NULL) {
-        fprintf(stderr, "failed to open file %s\n", argv[2]);
-        exit(-1);
-    }
+    if (input == NULL) err_quit("failed to open file %s", argv[2]);
     
     // write stringtable
     {

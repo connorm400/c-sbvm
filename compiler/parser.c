@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include "../err_macro.h"
 
 #define DEFAULT_SEGMENT_SIZE 20
 #define DEAFULT_STRINGTABLE_SIZE 10
@@ -11,7 +12,7 @@
 parser* parser_new(lex* lexer) 
 {
     parser* temp = malloc(sizeof(parser));
-    assert(temp && "buy more ram");
+    CHECK_ALLOC(temp);
     temp->cursor = 0;
     temp->input = lexer_collect(lexer);
     free(lexer);
@@ -22,17 +23,17 @@ parser* parser_new(lex* lexer)
     temp->stringtable.capacity = DEAFULT_STRINGTABLE_SIZE;
     temp->stringtable.len = 0;
     temp->stringtable.arr = malloc(sizeof(char*) * DEAFULT_STRINGTABLE_SIZE);
-    assert(temp->stringtable.arr && "buy more ram");
+    CHECK_ALLOC(temp->stringtable.arr);
     temp->stringtable.arr[0] = "\n";
     temp->stringtable.len++;
 
-    temp->segments.arr = (Segment*)malloc(sizeof(Segment) * DEFAULT_SEGMENT_SIZE);
-    assert(temp->segments.arr && "buy more ram");
+    temp->segments.arr = malloc(sizeof(Segment) * DEFAULT_SEGMENT_SIZE);
+    CHECK_ALLOC(temp->segments.arr);
     temp->segments.capacity = DEFAULT_SEGMENT_SIZE;
     temp->segments.len = 0;
 
     temp->labels.arr = malloc(sizeof(char*) * DEFAULT_LABELS_SIZE);
-    assert(temp->labels.arr && "buy more ram"); 
+    CHECK_ALLOC(temp->labels.arr); 
     temp->labels.capacity = DEFAULT_LABELS_SIZE;
     temp->labels.len = 0;
 
@@ -90,9 +91,9 @@ extern parser_res parse(parser* p)
 
     // free up unused vec space
     p->segments.arr = realloc(p->segments.arr, p->segments.len * sizeof(Segment));
-    assert(p->segments.arr && "buy more ram");
+    CHECK_ALLOC(p->segments.arr);
     p->stringtable.arr = realloc(p->stringtable.arr, p->stringtable.len * sizeof(char*));
-    assert(p->stringtable.arr && "buy more ram");
+    CHECK_ALLOC(p->stringtable.arr);
 
     // move stuff from parser state struct to parser_res
     res.segments = p->segments.arr;
@@ -117,7 +118,7 @@ static void parse_segment(parser* p)
     
     size_t arr_capacity = DEFAULT_SEGMENT_SIZE;
     seg.instructions = malloc(sizeof(Instruction) * arr_capacity);
-    assert(seg.instructions && "buy more ram");
+    CHECK_ALLOC(seg.instructions);
     while (p->current->type != RSQUIRLY) {
         #if DEBUG
         print_token(p->current); putchar('\n');
@@ -126,7 +127,7 @@ static void parse_segment(parser* p)
         if (seg.size > arr_capacity) {
             arr_capacity *= 2;
             seg.instructions = realloc(seg.instructions, arr_capacity * sizeof(Instruction));
-            assert(seg.instructions && "buy more ram");
+            CHECK_ALLOC(seg.instructions);
         }
 
         seg.instructions[seg.size] = parse_instruction(p);
@@ -139,13 +140,13 @@ static void parse_segment(parser* p)
     // realloc to free up memory
     if (seg.size != arr_capacity && seg.size != 0) {
         seg.instructions = realloc(seg.instructions, seg.size * sizeof(Instruction));
-        assert(seg.instructions && "buy more ram");
+        CHECK_ALLOC(seg.instructions);
     }
     
     if (p->segments.len >= p->segments.capacity) {
         p->segments.capacity *= 2;
         p->segments.arr = realloc(p->segments.arr, p->segments.capacity * sizeof(Segment));
-        assert(p->segments.arr && "buy more ram");
+        CHECK_ALLOC(p->segments.arr);
     }
     p->segments.arr[p->segments.len] = seg;
     p->segments.len++;
@@ -173,7 +174,7 @@ static Instruction parse_instruction(parser* p)
                 if (p->stringtable.capacity <= p->stringtable.len) {
                     p->stringtable.capacity *= 2;
                     p->stringtable.arr = realloc(p->stringtable.arr, p->stringtable.capacity * sizeof(char*));
-                    assert(p->stringtable.arr && "buy more ram");
+                    CHECK_ALLOC(p->stringtable.arr);
                 }
 
                 p->stringtable.arr[p->stringtable.len] = p->current->string;
@@ -259,7 +260,7 @@ static Instruction parse_instruction(parser* p)
 
         size_t msglen = msg1len + msg2len + msg3len + 1;
         p->err_msg = malloc(sizeof(char) * msglen);
-        assert(p->err_msg && "buy more ram");
+        CHECK_ALLOC(p->err_msg);
 
         strcpy(p->err_msg, msg1);
         strcpy(p->err_msg + msg1len, msg2);
@@ -290,7 +291,7 @@ static void add_label(parser* p)
     if (p->labels.capacity <= p->labels.len) {
         p->labels.capacity *= 2;
         p->labels.arr = realloc(p->labels.arr, p->labels.capacity * sizeof(char**));
-        assert(p->labels.arr && "buy more ram");
+        CHECK_ALLOC(p->labels.arr);
     }
 
     p->labels.arr[p->labels.len] = p->current->label;
@@ -317,7 +318,7 @@ static size_t find_label(parser* p)
 
     size_t msglen = msg1len + msg2len + msg3len + 1;
     p->err_msg = malloc(sizeof(char) * msglen);
-    assert(p->err_msg && "buy more ram");
+    CHECK_ALLOC(p->err_msg);
 
     strcpy(p->err_msg, msg1);
     strcpy(p->err_msg + msg1len, msg2);

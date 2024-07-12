@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "vm.h"
+#include "err_macro.h"
 
 #define MATH_OP(Infix) \
     {StackItem a = stack_pop(); \
@@ -11,14 +12,14 @@
      stack_push(res);}
 
 #define JMP \
-    { idx = segments[idx].instructions[inst_num].segment_idx; \
-      inst_num = 0; \
+    { segment_idx = segments[segment_idx].instructions[inst_idx].segment_idx; \
+      inst_idx = 0; \
       continue; } 
 
 extern int eval(Segment* segments, char** stringtable) 
 {
-    size_t idx = 0; // segment index. start with 0 (main/start)
-    size_t inst_num = 0;
+    size_t segment_idx = 0; // segment index. start with 0 (main/start)
+    size_t inst_idx = 0;
 
     struct {
         size_t len, capacity;
@@ -29,15 +30,15 @@ extern int eval(Segment* segments, char** stringtable)
         // ok I know that gotos are bad but I need this to skip the for loop increment its fine ok
         
         #if DEBUG
-        printf("on segment %s\n", segments[idx].name);
-        printf("inst_num: %zu\n", inst_num);
-        printf("instruction: "); inst_print(segments[idx].instructions[inst_num], stringtable); putchar('\n'); 
+        printf("on segment %s\n", segments[segment_idx].name);
+        printf("inst_idx: %zu\n", inst_idx);
+        printf("instruction: "); inst_print(segments[segment_idx].instructions[inst_idx], stringtable); putchar('\n'); 
         #endif
 
-        switch (segments[idx].instructions[inst_num].code) {
+        switch (segments[segment_idx].instructions[inst_idx].code) {
             // stack operations
             case OP_PUSH:
-                stack_push(segments[idx].instructions[inst_num].item);
+                stack_push(segments[segment_idx].instructions[inst_idx].item);
                 break;
             case OP_DUP:
                 StackItem item = stack_dig(0);
@@ -45,7 +46,7 @@ extern int eval(Segment* segments, char** stringtable)
                 break;
 
             case OP_DIG:
-                stack_push(stack_dig(segments[idx].instructions[inst_num].idx_from_top));
+                stack_push(stack_dig(segments[segment_idx].instructions[inst_idx].idx_from_top));
                 break;
             case OP_DISCARD:
                 stack_pop();
@@ -56,7 +57,7 @@ extern int eval(Segment* segments, char** stringtable)
                 break;
 
             // integer math operations
-            case OP_ADD:MATH_OP(+); break;
+            case OP_ADD: MATH_OP(+); break;
             case OP_SUBTRACT: MATH_OP(-); break;
             case OP_MULTIPLY: MATH_OP(*); break;
             case OP_DIVIDE: MATH_OP(/); break;
@@ -74,18 +75,18 @@ extern int eval(Segment* segments, char** stringtable)
                 stack_push(res);
             } break;
             
-
+            
             // function handling
             case OP_CALL: {
                 if (call_stack.len >= call_stack.capacity) {
                     call_stack.capacity = call_stack.capacity == 0 ? 1 : call_stack.capacity * 2;
                     call_stack.arr = realloc(call_stack.arr, call_stack.capacity * sizeof(struct CallerAddress));
-                    assert(call_stack.arr && "buy more ram");
+                    CHECK_ALLOC(call_stack.arr);
                 }
 
                 call_stack.arr[call_stack.len++] = (struct CallerAddress) {
-                    .inst_idx = inst_num,
-                    .segment_idx = idx,
+                    .inst_idx = inst_idx,
+                    .segment_idx = segment_idx,
                 };
 
                 JMP;
@@ -96,8 +97,8 @@ extern int eval(Segment* segments, char** stringtable)
 
                 struct CallerAddress* ca = call_stack.arr + (--call_stack.len);
 
-                inst_num = ca->inst_idx + 1; // move onto the next instruction after the call
-                idx = ca->segment_idx;
+                inst_idx = ca->inst_idx + 1; // move onto the next instruction after the call
+                segment_idx = ca->segment_idx;
 
                 continue;
             } break;
@@ -114,7 +115,7 @@ extern int eval(Segment* segments, char** stringtable)
                 break;
 
         }
-        inst_num++;
+        inst_idx++;
     }
 
     free(call_stack.arr);

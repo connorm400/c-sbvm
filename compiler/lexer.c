@@ -1,19 +1,19 @@
 #include "lexer.h"
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include "../err_macro.h"
 
 #define LEXER_COLLECTOR_STARTING_SIZE 100
 
 extern lex* lex_new(const char* input) 
 {
     lex* temp = malloc(sizeof(lex));
-    assert(temp && "buy more ram");
+    CHECK_ALLOC(temp);
     temp->input = input;
     temp->input_len = strlen(input);
-    assert(temp->input_len >= 1);
+    if (temp->input_len < 1) err_quit("input must be nonempty");
     temp->cursor = 0;
     temp->ch = input[temp->cursor];
     return temp;
@@ -95,7 +95,7 @@ static char* __read(lex* l,  bool(*pred)(char))
         _lex_nextchar(l);
     }
     char* newstr = malloc((l->cursor - position + 1) * sizeof(char));
-    assert(newstr && "buy more ram");
+    CHECK_ALLOC(newstr);
     memcpy(newstr, l->input + position, (l->cursor - position) * sizeof(char));
     newstr[l->cursor - position] = '\0';
     return newstr;
@@ -150,7 +150,7 @@ extern void token_free(token* t)
 token* _token_new(token_type type) 
 {
     token* t = malloc(sizeof(token));
-    assert(t && "buy more ram");
+    CHECK_ALLOC(t);
     t->type = type;
     return t;
 }
@@ -200,13 +200,13 @@ extern tokens* lexer_collect(lex* l)
         size_t capacity;
     } vec = { .len = 0, .capacity = LEXER_COLLECTOR_STARTING_SIZE };
     vec.arr = malloc(vec.capacity * sizeof(token*));
-    assert(vec.arr && "buy more ram");
+    CHECK_ALLOC(vec.arr);
 
     for (token* t = lex_nexttoken(l); t->type != T_EOF; t = lex_nexttoken(l)) {
         if (vec.capacity <= vec.len) {
             vec.capacity *= 2;
             vec.arr = realloc(vec.arr, vec.capacity * sizeof(token*));
-            assert(vec.arr && "buy more ram");
+            CHECK_ALLOC(vec.arr);
         }
         
         vec.arr[vec.len] = t;
@@ -215,8 +215,9 @@ extern tokens* lexer_collect(lex* l)
     
     // reallocate the array so its more memory efficient
     vec.arr = realloc(vec.arr, vec.len * sizeof(token*));
+    CHECK_ALLOC(vec.arr);
     tokens* temp = malloc(sizeof(tokens));
-    assert(temp && "buy more ram");
+    CHECK_ALLOC(temp);
     temp->len = vec.len;
     temp->arr = vec.arr;
     return temp;

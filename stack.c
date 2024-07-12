@@ -1,14 +1,14 @@
 #include "stack.h"
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
+#include "err_macro.h"
 
 extern void stack_push(StackItem item) 
 {
     if (stack.size >= stack.capacity) {
         stack.capacity = stack.capacity == 0 ? 1 : stack.capacity * 2;
         stack.arr = realloc(stack.arr, sizeof(StackItem) * stack.capacity);
-        assert(stack.arr && "buy more ram");
+        CHECK_ALLOC(stack.arr);
     }
     stack.arr[stack.size++] = item;
 }

@@ -14,7 +14,7 @@ runrelease:
 
 install:
 	gcc -o ./.build/dracompile compile.c vm.c stack.c ./compiler/lexer.c ./compiler/parser.c 
-	gcc -o ./.build/drrun run.c vm.c stack.c  ./compiler/lexer.c ./compiler/parser.c 
+	gcc -o ./.build/drarun run.c vm.c stack.c  ./compiler/lexer.c ./compiler/parser.c 
 
 installdebug:
 	gcc -o ./.build/dracompile compile.c vm.c stack.c ./compiler/lexer.c ./compiler/parser.c -D DEBUG

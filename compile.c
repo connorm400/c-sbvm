@@ -76,7 +76,6 @@ int main(int argc, char** argv)
     }
     
     parser_free(p);
-    
 
     fclose(f);
     return 0;

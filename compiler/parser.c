@@ -5,6 +5,8 @@
 #include <string.h>
 #include "../err_macro.h"
 
+#define IMPLICIT_FUNCTION_CALLS 1
+
 #define DEFAULT_SEGMENT_SIZE 20
 #define DEAFULT_STRINGTABLE_SIZE 10
 #define DEFAULT_LABELS_SIZE 5
@@ -200,6 +202,7 @@ static Instruction parse_instruction(parser* p)
     } else if (strcmp(p->current->ident, "jlt") == 0) {
         inst = parse_jump(p, OP_JLT);
     
+    #if ! IMPLICIT_FUNCTION_CALLS
     // function calls n stuff
     } else if (strcmp(p->current->ident, "call") == 0) {
         advance_token(p); // advance past call
@@ -209,7 +212,7 @@ static Instruction parse_instruction(parser* p)
         inst.code = OP_CALL;
         inst.segment_idx = find_label(p);
         advance_token(p);
-    
+    #endif
     // other
     } else if (strcmp(p->current->ident, "exit") == 0) {
         inst.code = OP_EXIT;
@@ -247,7 +250,12 @@ static Instruction parse_instruction(parser* p)
     } else if (strcmp(p->current->ident, "cr") == 0) {
         inst =  (Instruction) { .code = OP_PUSH, .item = { .type = T_STR, .str_idx = 0 }};
     } else {
+        #if IMPLICIT_FUNCTION_CALLS
 
+        inst.code = OP_CALL,
+        inst.segment_idx = find_label(p);
+
+        #else
         // forgot sprintf existed here dw about it
         char* msg1 = "identifier '";
         size_t msg1len = strlen(msg1);
@@ -268,6 +276,7 @@ static Instruction parse_instruction(parser* p)
         p->err_msg[msglen - 1] = '\0';
         
         p->err_dealloc = free;
+        #endif
 
     }
 

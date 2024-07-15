@@ -1,7 +1,7 @@
 %start {
     "1 incremented is " print 
 
-    1 call(inc) print
+    1 inc print
     "." print cr print
 
     0 exit  

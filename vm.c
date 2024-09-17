@@ -110,9 +110,10 @@ extern int eval(Segment* segments, char** stringtable)
             case OP_JLT: if (stack_pop().cmp == LT) JMP; break;
             case OP_JGT: if (stack_pop().cmp == GT) JMP; break;
 
-            case OP_EXIT:
+            case OP_EXIT: {
+                free(call_stack.arr);
                 return stack_pop().integer;
-                break;
+            } break;
 
         }
         inst_idx++;
